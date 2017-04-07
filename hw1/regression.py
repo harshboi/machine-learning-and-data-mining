@@ -4,6 +4,7 @@
 # Nathan Brahmstadt and Jordan Crane
 ################################################
 import numpy as np
+import random
 from numpy.linalg import inv
 
 ####### Main ########
@@ -65,6 +66,20 @@ def extract_features_and_output(line):
     features_and_output = line.split()
     return features_and_output[0:-1], features_and_output[-1]
 
+def get_training_data():
+    training_file = open("data/housing_train.txt", 'r')
+    return build_data_arrays(training_file)
+
+def get_testing_data():
+    testing_file = open("data/housing_test.txt", "r")
+    return build_data_arrays(testing_file)
+
+def train_model(features, outputs):
+    weight = calculate_weight_vector(features, outputs)
+    print "Weight Vector: ", weight
+    print "Training SSE: ", calculate_sse(features, outputs, weight)
+    return weight
+
 def calculate_weight_vector(X, y):
     # Formula for weight vector from slides
     return inv(X.T.dot(X)).dot(X.T).dot(y)
@@ -84,5 +99,15 @@ def add_dummy_variables(features):
 def calculate_sse(X, y, w):
     # Formula for grad(E(w))) (i.e. SSE) from slides
     return (y-X.dot(w)).T.dot(y-X.dot(w))
+
+def insert_random_features(data_array, max_random_value):
+    data_array = data_array.T
+    row, col = data_array.shape
+
+    data_array = np.resize(data_array, (row+1, col))
+
+    for i, val in enumerate(data_array[row]):
+        data_array[row][i] = random.uniform(0, max_random_value)
+    return data_array.T
 
 main()
