@@ -26,7 +26,7 @@ def extract_features_and_output(line):
     features_and_output = line.split()
     
     #Instert the dummy variable at the beginning of the array so that we can get a weight for the constant later
-    features_and_outputs.insert(0,1)
+    features_and_output.insert(0,1)
     
     return features_and_output[0:-1], features_and_output[-1]
 
