@@ -4,6 +4,7 @@
 # Nathan Brahmstadt and Jordan Crane
 ################################################
 import numpy as np
+import random
 from numpy.linalg import inv
 
 ####### Part1 ########
@@ -25,9 +26,6 @@ def extract_features_and_output(line):
 
     features_and_output = line.split()
     
-    #Instert the dummy variable at the beginning of the array so that we can get a weight for the constant later
-    features_and_output.insert(0,1)
-    
     return features_and_output[0:-1], features_and_output[-1]
 
 
@@ -36,12 +34,19 @@ def compute_weight_vector(X, y):
 	w = inv(X.T.dot(X)).dot(X.T).dot(y)
 	return w
 
-    
-def train_model():
+def get_training_data():
     training_file = open("data/housing_train.txt", 'r')
-    (features, outputs) = build_data_arrays(training_file)
+    return build_data_arrays(training_file)
+    
+def get_testing_data():
+    testing_file = open("data/housing_test.txt", "r")
+    return build_data_arrays(testing_file)
+    
+def train_model(features, outputs):
     weight_vector = compute_weight_vector(features, outputs)
-    print "Training Model SSE:"
+    print("\nWeight Vector:")
+    print weight_vector
+    print "\nTraining Model SSE:"
     print calc_sse(features, weight_vector, outputs)
     return weight_vector
 
@@ -57,20 +62,50 @@ def calc_sse(x, w, y):
   
     return total_sse
     
-  
+def test_model(features, outputs, weight_vector):
+    print "\nTest SSE:"
+    print calc_sse(features, weight_vector, outputs)
     
-def test_model(weight_vector):
-    testing_file = open("data/housing_test.txt", "r")
-    (features, outputs) = build_data_arrays(testing_file)
-    #TODO run data through model
-    #TODO calculate SSE
+def insert_feature_data(data_array, value):
+    data_array = data_array.T
+    row, col = data_array.shape
+    
+    data_array = np.resize(data_array, (row+1, col))
+  
+    for i, val in enumerate(data_array[row]):
+        data_array[row][i] = value
+    return data_array.T
+   
+    
+def insert_random_feature_data(data_array, max_random_value):
+    data_array = data_array.T
+    row, col = data_array.shape
+    
+    data_array = np.resize(data_array, (row+1, col))
+
+    for i, val in enumerate(data_array[row]):
+        data_array[row][i] = random.uniform(0, max_random_value)
+    return data_array.T
+    
+def train_and_test(use_dummy_var_flag, random_features_to_add):
+    features, outputs = get_training_data()
+    if(use_dummy_var_flag):
+        features = insert_feature_data(features, 1)
+    weight_vector = train_model(features, outputs)
+    features, outputs = get_testing_data()
+    if(use_dummy_var_flag):
+        features = insert_feature_data(features, 1)
+    test_model(features, outputs, weight_vector)
 
 #Don't print in scientific notation :)
 np.set_printoptions(suppress=True)
-weight_vector = train_model()
+random.seed()
 
-print "Weight Vector:"
-print weight_vector
+print("\n--------\nNo Dummy Variable\n--------")
+train_and_test(0, 0)
 
-test_model(weight_vector)
+print("\n--------\nWith Dummy Variable\n--------")
+train_and_test(1, 0)
+
+    
 
