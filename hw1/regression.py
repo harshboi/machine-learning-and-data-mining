@@ -41,10 +41,24 @@ def train_model():
     training_file = open("data/housing_train.txt", 'r')
     (features, outputs) = build_data_arrays(training_file)
     weight_vector = compute_weight_vector(features, outputs)
-    #TODO calculate SSE
+    print "Training Model SSE:"
+    print calc_sse(features, weight_vector, outputs)
     return weight_vector
 
+def calc_sse(x, w, y):
+    total_sse = 0
+    for i, y_val in enumerate(y):
+        running_sum = 0
+        for j, w_val in enumerate(w):
+         
+            running_sum += w_val*x[i][j]
 
+        total_sse += (y_val - running_sum)**2
+  
+    return total_sse
+    
+  
+    
 def test_model(weight_vector):
     testing_file = open("data/housing_test.txt", "r")
     (features, outputs) = build_data_arrays(testing_file)
