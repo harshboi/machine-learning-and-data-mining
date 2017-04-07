@@ -11,24 +11,46 @@ from numpy.linalg import inv
 def main():
     # Don't print in scientific notation :)
     np.set_printoptions(suppress=True)
+    #Setup random number generator
+    random.seed()
     
-    print("\n--------\nNo Dummy Variable\n--------")
+    #No dummy variable means no constant in the linear regression
+    print "\n--------\nNo Dummy Variable\n--------"
     train_and_test(0, 0)
 
-    print("\n--------\nWith Dummy Variable\n--------")
+    print "\n--------\nWith Dummy Variable\n--------"
     train_and_test(1, 0)
 
+    #For problem 5, add 2, 4, 6, 8, and 10 features with random values 
+    for i in range(5):
+        features_to_add = 2+(2*i)
+        print "\n--------\nAdding " + str(features_to_add) + " random features\n--------"
+        train_and_test(1, features_to_add)
+        
 ####### Functions #######
 
 #Used to train and test, can decide to add a constant or random features(Needed for problem 5)
 def train_and_test(use_dummy_var_flag, random_features_to_add):
+    #Get the raw text data as a matrix
     features, outputs = get_training_data()
+    
+    #Adds a 1 to the begining of all samples
     if(use_dummy_var_flag):
         features = insert_feature_data(features, 1)
+    #Adds the specified number of features to each sample
+    if(random_features_to_add > 0):
+        for i in range(random_features_to_add):
+            #Max randomized value possible is different for each feature, as specified in assignment
+            features = insert_random_feature_data(features, random.uniform(0, 100))
     weight_vector = train_model(features, outputs)
     features, outputs = get_testing_data()
+    
     if(use_dummy_var_flag):
         features = insert_feature_data(features, 1)
+    if(random_features_to_add > 0):
+        for i in range(random_features_to_add):
+            features = insert_random_feature_data(features, random.uniform(0, 100))
+            
     test_model(features, outputs, weight_vector)
     
 def build_data_arrays(file):
