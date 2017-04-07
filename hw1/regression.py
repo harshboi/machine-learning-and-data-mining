@@ -10,25 +10,42 @@ from numpy.linalg import inv
 def main():
     # Don't print in scientific notation :)
     np.set_printoptions(suppress=True)
-    weight_vector = train_model()
 
+    ### Parts 1-3 ###
+    print "\n########## WITH DUMMY VARIABLES ##########"
+    weight = train_with_dummy_variables()
     print "Weight Vector:"
-    print weight_vector
+    print weight
+    test_with_dummy_variables(weight)
 
-    test_model(weight_vector)
+    ### Part 4 ###
+    print "\n########## WITHOUT DUMMY VARIABLES ##########"
+    weight_no_dummy_variables = \
+        train_without_dummy_variables()
+    print "Weight Vector:"
+    print weight_no_dummy_variables
+    test_without_dummy_variables(weight_no_dummy_variables)
 
 ####### Functions #######
-def train_model():
-    training_file = open("data/housing_train.txt", 'r')
-    (features, outputs) = build_data_arrays(training_file)
+def train_with_dummy_variables():
+    (features, outputs) = get_data_arrays("data/housing_train.txt")
+    features = add_dummy_variables(features)
+    return train(features, outputs)
+
+def train_without_dummy_variables():
+    (features, outputs) = get_data_arrays("data/housing_train.txt")
+    return train(features, outputs)
+
+def get_data_arrays(filename):
+    file = open(filename, 'r')
+    (features, outputs) = build_data_arrays(file)
+    file.close()
+    return features, outputs
+
+def train(features, outputs):
     weight = calculate_weight_vector(features, outputs)
     print "Training SSE: ", calculate_sse(features, outputs, weight)
     return weight
-
-def test_model(weight):
-    testing_file = open("data/housing_test.txt", "r")
-    (features, outputs) = build_data_arrays(testing_file)
-    print "Testing SSE: ", calculate_sse(features, outputs, weight)
 
 def build_data_arrays(file):
     (features, outputs) = build_data_lists(file)
@@ -46,13 +63,23 @@ def build_data_lists(file):
 
 def extract_features_and_output(line):
     features_and_output = line.split()
-    # Instert dummy variable at the front of the array to calculate constant
-    features_and_output.insert(0, 1)
     return features_and_output[0:-1], features_and_output[-1]
 
 def calculate_weight_vector(X, y):
     # Formula for weight vector from slides
     return inv(X.T.dot(X)).dot(X.T).dot(y)
+
+def test_with_dummy_variables(weight):
+    (features, outputs) = get_data_arrays("data/housing_test.txt")
+    features = add_dummy_variables(features)
+    print "Testing SSE: ", calculate_sse(features, outputs, weight)
+
+def test_without_dummy_variables(weight):
+    (features, outputs) = get_data_arrays("data/housing_test.txt")
+    print "Testing SSE: ", calculate_sse(features, outputs, weight)
+
+def add_dummy_variables(features):
+    return np.hstack((np.ones((1, len(features)), dtype=float).T, features))
 
 def calculate_sse(X, y, w):
     # Formula for grad(E(w))) (i.e. SSE) from slides
