@@ -6,7 +6,30 @@
 import numpy as np
 from numpy.linalg import inv
 
-####### Part1 ########
+####### Main ########
+def main():
+    # Don't print in scientific notation :)
+    np.set_printoptions(suppress=True)
+    weight_vector = train_model()
+
+    print "Weight Vector:"
+    print weight_vector
+
+    test_model(weight_vector)
+
+####### Functions #######
+def train_model():
+    training_file = open("data/housing_train.txt", 'r')
+    (features, outputs) = build_data_arrays(training_file)
+    weight = compute_weight_vector(features, outputs)
+    print "Training SSE: ", calculate_sse(features, outputs, weight)
+    return weight
+
+def test_model(weight):
+    testing_file = open("data/housing_test.txt", "r")
+    (features, outputs) = build_data_arrays(testing_file)
+    print "Testing SSE: ", calculate_sse(features, outputs, weight)
+
 def build_data_arrays(file):
     (features, outputs) = build_data_lists(file)
     # Arrays are equivalent to matrices and vectors in Python
@@ -22,55 +45,20 @@ def build_data_lists(file):
     return features, outputs
 
 def extract_features_and_output(line):
-
     features_and_output = line.split()
-    
-    #Instert the dummy variable at the beginning of the array so that we can get a weight for the constant later
-    features_and_output.insert(0,1)
-    
+    # Instert dummy variable at the front of the array to calculate constant
+    features_and_output.insert(0, 1)
     return features_and_output[0:-1], features_and_output[-1]
-
 
 def compute_weight_vector(X, y):
     # Formula for weight vector
 	w = inv(X.T.dot(X)).dot(X.T).dot(y)
 	return w
 
-    
-def train_model():
-    training_file = open("data/housing_train.txt", 'r')
-    (features, outputs) = build_data_arrays(training_file)
-    weight_vector = compute_weight_vector(features, outputs)
-    print "Training Model SSE:"
-    print calc_sse(features, weight_vector, outputs)
-    return weight_vector
+def calculate_sse(X, y, w):
+    sse = 0
+    for i, y_value in enumerate(y):
+        sse += (y_value - X[i].dot(w))**2
+    return sse
 
-def calc_sse(x, w, y):
-    total_sse = 0
-    for i, y_val in enumerate(y):
-        running_sum = 0
-        for j, w_val in enumerate(w):
-         
-            running_sum += w_val*x[i][j]
-
-        total_sse += (y_val - running_sum)**2
-  
-    return total_sse
-    
-  
-    
-def test_model(weight_vector):
-    testing_file = open("data/housing_test.txt", "r")
-    (features, outputs) = build_data_arrays(testing_file)
-    #TODO run data through model
-    #TODO calculate SSE
-
-#Don't print in scientific notation :)
-np.set_printoptions(suppress=True)
-weight_vector = train_model()
-
-print "Weight Vector:"
-print weight_vector
-
-test_model(weight_vector)
-
+main()
