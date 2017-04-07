@@ -51,14 +51,11 @@ def extract_features_and_output(line):
     return features_and_output[0:-1], features_and_output[-1]
 
 def compute_weight_vector(X, y):
-    # Formula for weight vector
-	w = inv(X.T.dot(X)).dot(X.T).dot(y)
-	return w
+    # Formula for weight vector from slides
+	return inv(X.T.dot(X)).dot(X.T).dot(y)
 
 def calculate_sse(X, y, w):
-    sse = 0
-    for i, y_value in enumerate(y):
-        sse += (y_value - X[i].dot(w))**2
-    return sse
+    # Formula for grad(E(w))) (i.e. SSE) from slides
+    return (y-X.dot(w)).T.dot(y-X.dot(w))
 
 main()
