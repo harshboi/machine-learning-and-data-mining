@@ -21,7 +21,7 @@ def main():
 def train_model():
     training_file = open("data/housing_train.txt", 'r')
     (features, outputs) = build_data_arrays(training_file)
-    weight = compute_weight_vector(features, outputs)
+    weight = calculate_weight_vector(features, outputs)
     print "Training SSE: ", calculate_sse(features, outputs, weight)
     return weight
 
@@ -50,9 +50,9 @@ def extract_features_and_output(line):
     features_and_output.insert(0, 1)
     return features_and_output[0:-1], features_and_output[-1]
 
-def compute_weight_vector(X, y):
+def calculate_weight_vector(X, y):
     # Formula for weight vector from slides
-	return inv(X.T.dot(X)).dot(X.T).dot(y)
+    return inv(X.T.dot(X)).dot(X.T).dot(y)
 
 def calculate_sse(X, y, w):
     # Formula for grad(E(w))) (i.e. SSE) from slides
