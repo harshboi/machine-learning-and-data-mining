@@ -100,14 +100,4 @@ def calculate_sse(X, y, w):
     # Formula for grad(E(w))) (i.e. SSE) from slides
     return (y-X.dot(w)).T.dot(y-X.dot(w))
 
-def insert_random_features(data_array, max_random_value):
-    data_array = data_array.T
-    row, col = data_array.shape
-
-    data_array = np.resize(data_array, (row+1, col))
-
-    for i, val in enumerate(data_array[row]):
-        data_array[row][i] = random.uniform(0, max_random_value)
-    return data_array.T
-
 main()
