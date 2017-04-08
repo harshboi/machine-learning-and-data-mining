@@ -16,21 +16,26 @@ def main():
     
     #No dummy variable means no constant in the linear regression
     print "\n--------\nNo Dummy Variable\n--------"
-    train_and_test(0, 0)
+    train_and_test(0, 0, 0)
 
     print "\n--------\nWith Dummy Variable\n--------"
-    train_and_test(1, 0)
+    train_and_test(1, 0, 0)
 
     #For problem 5, add 2, 4, 6, 8, and 10 features with random values 
     for i in range(20):
         features_to_add = 2+(2*i)
         print "\n--------\nAdding " + str(features_to_add) + " random features\n--------"
-        train_and_test(1, features_to_add)
-        
+        train_and_test(1, features_to_add, 0)
+     
+    #For problem 6, vary the scalar
+    scalars_to_test = [.01, .05, .1, .5, 1, 5, 10, 15]
+    for i in scalars_to_test:
+        print "\n--------\nUsing " + str(i) + " as a scalar\n--------"
+        train_and_test(1, 0, i)
 ####### Functions #######
 
 #Used to train and test, can decide to add a constant or random features(Needed for problem 5)
-def train_and_test(use_dummy_var_flag, random_features_to_add):
+def train_and_test(use_dummy_var_flag, random_features_to_add, w_variant_scalar):
     #Get the raw text data as a matrix
     features, outputs = get_training_data()
     
@@ -45,7 +50,9 @@ def train_and_test(use_dummy_var_flag, random_features_to_add):
             random_feature_max.append(random.uniform(0, 100))
             #Max randomized value possible is different for each feature, as specified in assignment
             features = insert_random_feature_data(features, random_feature_max[i])
-    weight_vector = train_model(features, outputs)
+            
+    weight_vector = train_model(features, outputs, w_variant_scalar)
+    
     features, outputs = get_testing_data()
     
     if(use_dummy_var_flag):
@@ -82,15 +89,20 @@ def get_testing_data():
     testing_file = open("data/housing_test.txt", "r")
     return build_data_arrays(testing_file)
     
-def train_model(features, outputs):
-    weight = calculate_weight_vector(features, outputs)
+def train_model(features, outputs, scalar):
+    weight = calculate_weight_vector_variant(features, outputs, scalar)
     print "Weight Vector: ", weight
     print "Training SSE: ", calculate_sse(features, outputs, weight)
     return weight
     
+#Don't use this, use the variant
 def calculate_weight_vector(X, y):
     # Formula for weight vector from slides
     return inv(X.T.dot(X)).dot(X.T).dot(y)
+    
+def calculate_weight_vector_variant(X, y, scalar):
+    row, col = X.shape
+    return inv(X.T.dot(X) + scalar*np.identity(col)).dot(X.T).dot(y)
     
 def calculate_sse(X, y, w):
     # Formula for grad(E(w))) (i.e. SSE) from slides
