@@ -4,8 +4,9 @@
 # Nathan Brahmstadt and Jordan Crane
 ################################################
 import numpy as np
-import random
 from numpy.linalg import inv
+import numpy.random
+import random
 
 ####### Main ########
 def main():
@@ -13,56 +14,81 @@ def main():
     np.set_printoptions(suppress=True)
     #Setup random number generator
     random.seed(123)
-    
-    #No dummy variable means no constant in the linear regression
-    print "\n--------\nNo Dummy Variable\n--------"
-    train_and_test(0, 0, 0)
 
-    print "\n--------\nWith Dummy Variable\n--------"
-    train_and_test(1, 0, 0)
+    ### Without Dummy Variables ###
+    print_()
+    weight = train_without_dummy_variable()
+    test_without_dummy_variable(weight)
 
-    #For problem 5, add 2, 4, 6, 8, and 10 features with random values 
-    for i in range(20):
-        features_to_add = 2+(2*i)
-        print "\n--------\nAdding " + str(features_to_add) + " random features\n--------"
-        train_and_test(1, features_to_add, 0)
-     
+    ### With Dummy Variables ###
+    print_(dummy_variable=True)
+    weight = train_with_dummy_variable()
+    test_with_dummy_variable(weight)
+
+    ### With Random Features ###
+    #For problem 5, add 2, 4, 6, 8, and 10 features with random values
+    for number_of_features in range(2, 12, 2):
+        print_(random_features=number_of_features)
+        weight = train_with_random_features(number_of_features)
+        test_with_random_features(weight, number_of_features)
+
+    ### With Scalar Multiplier ###
     #For problem 6, vary the scalar
     scalars_to_test = [.01, .05, .1, .5, 1, 5, 10, 15]
-    for i in scalars_to_test:
-        print "\n--------\nUsing " + str(i) + " as a scalar\n--------"
-        train_and_test(1, 0, i)
-####### Functions #######
+    for scalar in scalars_to_test:
+        print_(scalar=scalar)
+        weight = train_with_scalar(scalar)
+        test_with_scalar(weight)
 
-#Used to train and test, can decide to add a constant or random features(Needed for problem 5)
-def train_and_test(use_dummy_var_flag, random_features_to_add, w_variant_scalar):
-    #Get the raw text data as a matrix
-    features, outputs = get_training_data()
-    
-    random_feature_max = []
-    
-    #Adds a 1 to the begining of all samples
-    if(use_dummy_var_flag):
-        features = insert_feature_data(features, 1)
-    #Adds the specified number of features to each sample
-    if(random_features_to_add > 0):
-        for i in range(random_features_to_add):
-            random_feature_max.append(random.uniform(0, 100))
-            #Max randomized value possible is different for each feature, as specified in assignment
-            features = insert_random_feature_data(features, random_feature_max[i])
-            
-    weight_vector = train_model(features, outputs, w_variant_scalar)
-    
-    features, outputs = get_testing_data()
-    
-    if(use_dummy_var_flag):
-        features = insert_feature_data(features, 1)
-    if(random_features_to_add > 0):
-        for i in range(random_features_to_add):
-            features = insert_random_feature_data(features, random_feature_max[i])
-            
-    test_model(features, outputs, weight_vector)
-    
+####### Functions #######
+def train_with_dummy_variable(features=None, outputs=None, scalar=0):
+    if features is None:
+        (features, outputs) = get_data_arrays("data/housing_train.txt")
+    features = insert_dummy_variable(features)
+    return train(features, outputs, scalar)
+
+def test_with_dummy_variable(weight, features=None, outputs=None, scalar=0):
+    if features is None:
+        (features, outputs) = get_data_arrays("data/housing_test.txt")
+    features = insert_dummy_variable(features)
+    test(features, outputs, weight)
+
+def train_without_dummy_variable():
+    features, outputs = get_data_arrays("data/housing_train.txt")
+    return train(features, outputs)
+
+def test_without_dummy_variable(weight):
+    (features, outputs) = get_data_arrays("data/housing_test.txt")
+    test(features, outputs, weight)
+
+def train_with_random_features(number_of_features):
+    (features, outputs) = get_data_arrays("data/housing_train.txt")
+    features = insert_random_features(features, number_of_features)
+    return train_with_dummy_variable(features=features, outputs=outputs)
+
+def test_with_random_features(weight, number_of_features):
+    (features, outputs) = get_data_arrays("data/housing_test.txt")
+    features = insert_random_features(features, number_of_features)
+    return test_with_dummy_variable(weight, features=features, outputs=outputs)
+
+def train_with_scalar(scalar):
+    return train_with_dummy_variable(scalar=scalar)
+
+def test_with_scalar(weight):
+    test_with_dummy_variable(weight)
+
+def train(features, outputs, scalar=0):
+    weight = calculate_weight_vector(features, outputs, scalar)
+    print("Weight Vector:\n", weight)
+    print("Training SSE: ", calculate_sse(features, outputs, weight))
+    return weight
+
+def get_data_arrays(filename):
+    file = open(filename, 'r')
+    (features, outputs) = build_data_arrays(file)
+    file.close()
+    return features, outputs
+
 def build_data_arrays(file):
     (features, outputs) = build_data_lists(file)
     # Arrays are equivalent to matrices and vectors in Python
@@ -81,55 +107,45 @@ def extract_features_and_output(line):
     features_and_output = line.split()
     return features_and_output[0:-1], features_and_output[-1]
 
-def get_training_data():
-    training_file = open("data/housing_train.txt", 'r')
-    return build_data_arrays(training_file)
-    
-def get_testing_data():
-    testing_file = open("data/housing_test.txt", "r")
-    return build_data_arrays(testing_file)
-    
-def train_model(features, outputs, scalar):
-    weight = calculate_weight_vector_variant(features, outputs, scalar)
-    print "Weight Vector: ", weight
-    print "Training SSE: ", calculate_sse(features, outputs, weight)
-    return weight
-    
-#Don't use this, use the variant
-def calculate_weight_vector(X, y):
+def calculate_weight_vector(X, y, scalar):
     # Formula for weight vector from slides
-    return inv(X.T.dot(X)).dot(X.T).dot(y)
-    
-def calculate_weight_vector_variant(X, y, scalar):
-    row, col = X.shape
-    return inv(X.T.dot(X) + scalar*np.identity(col)).dot(X.T).dot(y)
-    
+    return inv(X.T.dot(X) + scalar*np.identity(X.shape[1])).dot(X.T).dot(y)
+
 def calculate_sse(X, y, w):
     # Formula for grad(E(w))) (i.e. SSE) from slides
     return (y-X.dot(w)).T.dot(y-X.dot(w))
-    
-def test_model(features, outputs, weight):
-    print "Testing SSE: ", calculate_sse(features, outputs, weight)
-    
-def insert_feature_data(data_array, value):
-    data_array = data_array.T
-    row, col = data_array.shape
-    
-    data_array = np.resize(data_array, (row+1, col))
-  
-    for i, val in enumerate(data_array[row]):
-        data_array[row][i] = value
-    return data_array.T
-    
-def insert_random_feature_data(data_array, max_random_value):
-    data_array = data_array.T
-    row, col = data_array.shape
-    
-    data_array = np.resize(data_array, (row+1, col))
 
-    for i, val in enumerate(data_array[row]):
-        data_array[row][i] = random.uniform(0, max_random_value)
-    return data_array.T
-   
+def test(features, outputs, weight):
+    print("Testing SSE: ", calculate_sse(features, outputs, weight))
+
+def insert_dummy_variable(features):
+    return np.hstack((np.ones((1, len(features)), dtype=float).T, features))
+
+def insert_random_features(features, number_of_features):
+    for i in range(number_of_features):
+        features = insert_random_feature(features, random.uniform(0, 100))
+    return features
+
+def insert_random_feature(features, max_value):
+    random_array = np.random.rand(1, int(len(features))).dot(max_value)
+    return np.hstack((random_array.T, features))
+
+def print_(dummy_variable=False, random_features=0, scalar=0):
+    if scalar is not 0:
+        print("\n------------------------\
+               \nUsing ", scalar, " as a scalar\
+               \n------------------------")
+    elif dummy_variable is True:
+        print("\n-------------------\
+               \nWith Dummy Variable\
+               \n-------------------")
+    elif random_features is not 0:
+        print("\n---------------------------\
+               \nWith ", random_features, " random features\
+               \n---------------------------")
+    else:
+        print("\n------------------\
+               \nWithout Dummy Variable\
+               \n------------------")
 
 main()
