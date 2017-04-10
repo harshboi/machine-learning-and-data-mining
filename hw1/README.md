@@ -1,10 +1,11 @@
 # Assignment 1
 
 ## Dependencies
-- Python 3
+- Python
 - Numpy
 
 ## Usage
 ```sh
-python3 regression.py
+cd CS434-machine-learning/hw1
+python regression.py
 ```
