@@ -16,31 +16,43 @@ def main():
     random.seed(123)
 
     ### Without Dummy Variables ###
+    part_1()
+
+    ### With Dummy Variables ###
+    part_2()
+
+    ### With Random Features ###
+    #For problem 5, add 2, 4, 6, 8, and 10 features with random values
+    part_3()
+
+    ### With Scalar Multiplier ###
+    #For problem 6, vary the scalar
+    part_4()
+
+####### Functions #######
+def part_1():
     print_()
     weight = train_without_dummy_variable()
     test_without_dummy_variable(weight)
 
-    ### With Dummy Variables ###
+def part_2():
     print_(dummy_variable=True)
     weight = train_with_dummy_variable()
     test_with_dummy_variable(weight)
 
-    ### With Random Features ###
-    #For problem 5, add 2, 4, 6, 8, and 10 features with random values
+def part_3():
     for number_of_features in range(2, 12, 2):
         print_(random_features=number_of_features)
         weight = train_with_random_features(number_of_features)
         test_with_random_features(weight, number_of_features)
 
-    ### With Scalar Multiplier ###
-    #For problem 6, vary the scalar
+def part_4():
     scalars_to_test = [.01, .05, .1, .5, 1, 5, 10, 15]
     for scalar in scalars_to_test:
         print_(scalar=scalar)
         weight = train_with_scalar(scalar)
         test_with_scalar(weight)
 
-####### Functions #######
 def train_with_dummy_variable(features=None, outputs=None, scalar=0):
     if features is None:
         (features, outputs) = get_data_arrays("data/housing_train.txt")
