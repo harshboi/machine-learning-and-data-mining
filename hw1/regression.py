@@ -91,8 +91,8 @@ def test_with_scalar(weight):
 
 def train(features, outputs, scalar=0):
     weight = calculate_weight_vector(features, outputs, scalar)
-    print("Weight Vector:\n", weight)
-    print("Training SSE: ", calculate_sse(features, outputs, weight))
+    print "Weight Vector:\n", weight
+    print "Training SSE: ", calculate_sse(features, outputs, weight)
     return weight
 
 def get_data_arrays(filename):
@@ -128,7 +128,7 @@ def calculate_sse(X, y, w):
     return (y-X.dot(w)).T.dot(y-X.dot(w))
 
 def test(features, outputs, weight):
-    print("Testing SSE: ", calculate_sse(features, outputs, weight))
+    print "Testing SSE: ", calculate_sse(features, outputs, weight)
 
 def insert_dummy_variable(features):
     return np.hstack((np.ones((1, len(features)), dtype=float).T, features))
@@ -144,20 +144,20 @@ def insert_random_feature(features, max_value):
 
 def print_(dummy_variable=False, random_features=0, scalar=0):
     if scalar is not 0:
-        print("\n------------------------\
+        print "\n------------------------\
                \nUsing ", scalar, " as a scalar\
-               \n------------------------")
+               \n------------------------"
     elif dummy_variable is True:
-        print("\n-------------------\
+        print "\n-------------------\
                \nWith Dummy Variable\
-               \n-------------------")
+               \n-------------------"
     elif random_features is not 0:
-        print("\n---------------------------\
+        print "\n---------------------------\
                \nWith ", random_features, " random features\
-               \n---------------------------")
+               \n---------------------------"
     else:
-        print("\n------------------\
+        print "\n------------------\
                \nWithout Dummy Variable\
-               \n------------------")
+               \n------------------"
 
 main()
