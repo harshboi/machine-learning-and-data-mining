@@ -59,14 +59,14 @@ def train_with_dummy_variable(features=None, outputs=None, scalar=0):
     features = insert_dummy_variable(features)
     return train(features, outputs, scalar)
 
-def test_with_dummy_variable(weight, features=None, outputs=None, scalar=0):
+def test_with_dummy_variable(weight, features=None, outputs=None):
     if features is None:
         (features, outputs) = get_data_arrays("data/housing_test.txt")
     features = insert_dummy_variable(features)
     test(features, outputs, weight)
 
 def train_without_dummy_variable():
-    features, outputs = get_data_arrays("data/housing_train.txt")
+    (features, outputs) = get_data_arrays("data/housing_train.txt")
     return train(features, outputs)
 
 def test_without_dummy_variable(weight):
@@ -99,12 +99,12 @@ def get_data_arrays(filename):
     file = open(filename, 'r')
     (features, outputs) = build_data_arrays(file)
     file.close()
-    return features, outputs
+    return (features, outputs)
 
 def build_data_arrays(file):
     (features, outputs) = build_data_lists(file)
     # Arrays are equivalent to matrices and vectors in Python
-    return np.array(features, dtype=float), np.array(outputs, dtype=float)
+    return (np.array(features, dtype=float), np.array(outputs, dtype=float))
 
 def build_data_lists(file):
     features = []
@@ -113,11 +113,11 @@ def build_data_lists(file):
         (line_features, line_output) = extract_features_and_output(line)
         features.append(line_features)
         outputs.append(line_output)
-    return features, outputs
+    return (features, outputs)
 
 def extract_features_and_output(line):
     features_and_output = line.split()
-    return features_and_output[0:-1], features_and_output[-1]
+    return (features_and_output[0:-1], features_and_output[-1])
 
 def calculate_weight_vector(X, y, scalar):
     # Formula for weight vector from slides
@@ -131,7 +131,8 @@ def test(features, outputs, weight):
     print "Testing SSE: ", calculate_sse(features, outputs, weight)
 
 def insert_dummy_variable(features):
-    return np.hstack((np.ones((1, len(features)), dtype=float).T, features))
+    ones_array = np.ones((1, len(features)), dtype=float)
+    return np.hstack((ones_array.T, features))
 
 def insert_random_features(features, number_of_features):
     for i in range(number_of_features):
