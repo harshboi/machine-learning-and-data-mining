@@ -1,3 +1,4 @@
+#!/usr/bin/env python2
 ################################################
 # CS434 Machine Learning and Data Mining
 # Assignment 1
