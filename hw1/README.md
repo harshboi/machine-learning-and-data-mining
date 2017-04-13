@@ -6,8 +6,9 @@
 
 ## Usage
 ```sh
-# Change directory to the root folder of the assignment
-cd CS434-machine-learning/hw1
 # Run program
 ./regression.py
+
+# Output
+Output will be printed to the terminal
 ```
