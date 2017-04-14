@@ -1,4 +1,4 @@
-# Assignment 1
+# Assignment 2
 
 ## Dependencies
 - Python
@@ -7,7 +7,7 @@
 ## Usage
 ```sh
 # Run program
-./regression.py
+./handwriting.py
 
 # Output
 Output will be printed to the terminal
