@@ -22,8 +22,10 @@ def main():
     (training_features, training_outputs) = get_data_arrays(
             "data/usps-4-9-train.csv")
     (testing_features, testing_outputs) = get_data_arrays(
-            "data/usps-4-9-train.csv")
-    batch_gradient_descent(training_features, training_outputs)
+            "data/usps-4-9-test.csv")
+    weight = batch_gradient_descent(training_features, training_outputs)
+    
+    test_weight(training_features, training_outputs, weight)
 
 ########## Data Import ##########
 
@@ -57,15 +59,33 @@ def batch_gradient_descent(features, outputs):
     epsilon = 0.1
     iterations = 0
     while True:
+        old_norm = norm_of_gradient(weight)
         weight += learning_rate * update(features, outputs, weight)
-        print norm(np.gradient(weight))
-        if norm(np.gradient(weight)) < epsilon:
-            break
+        new_norm = norm_of_gradient(weight)
+        iterations += 1
+        if abs(old_norm - new_norm) < epsilon:
+            print "Convered at Iteration: " + str(iterations)
+            return weight
 
+def norm_of_gradient(weight):
+    return norm(np.gradient(weight))            
+            
 def update(features, outputs, weight):
     return (outputs - sigmoid(weight, features)).dot(features)
 
 def sigmoid(weight, features):
     return 1 / (1 + np.exp(-weight.dot(features.T)))
 
+def test_weight(features, outputs, weight):
+        guesses = sigmoid(weight, features)
+        right_tally = 0
+        wrong_tally = 0
+        for i, guess in enumerate(guesses):
+            if abs(guess-outputs[i]) <= 0.5:
+                right_tally += 1
+            else:
+                wrong_tally += 1
+        acc = float(right_tally) / (right_tally + wrong_tally)
+        print "Accuracy: " + str(acc*100) + "%"
+        
 main()
