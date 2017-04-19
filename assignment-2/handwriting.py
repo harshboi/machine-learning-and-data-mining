@@ -28,7 +28,7 @@ def main():
         learning_rate = float(10)/(10**i)
         print "Learning Rate of: " + str(learning_rate)
         weight = batch_gradient_descent(training_features, training_outputs, learning_rate)
-        
+       
         train_acc = test_weight(training_features, training_outputs, weight)
         
         print "Training Data Accuracy: " + str(train_acc*100) + "%"
@@ -85,18 +85,27 @@ def update(features, outputs, weight):
     return (outputs - sigmoid(weight, features)).dot(features)
 
 def sigmoid(weight, features):
-    return 1 / (1 + np.exp(-weight.dot(features.T)))
+    #prevent overflow...a low number would round to zero anyways
+    
+    prod = weight.dot(features.T)
+    arbitrarily_small_num = -99
+    for i, val in enumerate(prod):
+        if val <= arbitrarily_small_num:  
+            prod[i] = arbitrarily_small_num
+            
+   
+    return 1 / (1 + np.exp(-prod))
 
 def test_weight(features, outputs, weight):
-        guesses = sigmoid(weight, features)
-        right_tally = 0
-        wrong_tally = 0
-        for i, guess in enumerate(guesses):
-            if abs(guess-outputs[i]) <= 0.5:
-                right_tally += 1
-            else:
-                wrong_tally += 1
-        acc = float(right_tally) / (right_tally + wrong_tally)
-        return acc
+    guesses = sigmoid(weight, features)
+    right_tally = 0
+    wrong_tally = 0
+    for i, guess in enumerate(guesses):
+        if abs(guess-outputs[i]) <= 0.5:
+            right_tally += 1
+        else:
+            wrong_tally += 1
+    acc = float(right_tally) / (right_tally + wrong_tally)
+    return acc
         
 main()
