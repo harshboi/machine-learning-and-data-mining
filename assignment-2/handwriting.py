@@ -52,7 +52,7 @@ def extract_features_and_output(line):
 ########## Gradient Descent ##########
 
 def batch_gradient_descent(features, outputs):
-    weight = np.zeros_like(features[0])
+    weight = np.zeros_like(features[0], dtype=float)
     learning_rate = 0.01
     epsilon = 0.1
     iterations = 0
