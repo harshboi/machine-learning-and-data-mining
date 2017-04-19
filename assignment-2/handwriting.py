@@ -23,9 +23,20 @@ def main():
             "data/usps-4-9-train.csv")
     (testing_features, testing_outputs) = get_data_arrays(
             "data/usps-4-9-test.csv")
-    weight = batch_gradient_descent(training_features, training_outputs)
+    for i in range(5):
     
-    test_weight(training_features, training_outputs, weight)
+        learning_rate = float(10)/(10**i)
+        print "Learning Rate of: " + str(learning_rate)
+        weight = batch_gradient_descent(training_features, training_outputs, learning_rate)
+        
+        train_acc = test_weight(training_features, training_outputs, weight)
+        
+        print "Training Data Accuracy: " + str(train_acc*100) + "%"
+        
+        test_acc = test_weight(testing_features, testing_outputs, weight)
+        
+        print "Testing Data Accuracy: " + str(test_acc*100) + "%"
+    
 
 ########## Data Import ##########
 
@@ -53,10 +64,10 @@ def extract_features_and_output(line):
 
 ########## Gradient Descent ##########
 
-def batch_gradient_descent(features, outputs):
+def batch_gradient_descent(features, outputs, learning_rate):
     weight = np.zeros_like(features[0], dtype=float)
-    learning_rate = 0.01
-    epsilon = 0.1
+    #learning_rate = 0.01
+    epsilon = 0.0000001
     iterations = 0
     while True:
         old_norm = norm_of_gradient(weight)
@@ -86,6 +97,6 @@ def test_weight(features, outputs, weight):
             else:
                 wrong_tally += 1
         acc = float(right_tally) / (right_tally + wrong_tally)
-        print "Accuracy: " + str(acc*100) + "%"
+        return acc
         
 main()
