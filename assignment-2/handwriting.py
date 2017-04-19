@@ -43,10 +43,19 @@ def main():
         
     print "***** Problem 2 *****"
     print "....Generating Accuracy Data..."
-    weight = batch_gradient_descent(training_features, training_outputs, 0.01, True)
+    final_weight = batch_gradient_descent(training_features, training_outputs, 0.01, True)
     print "Done"
 
     print "***** Problem 3 *****"
+    
+    for i in range(7):
+        scalar = float(.001)*(10**i)
+        print "Using a scaler of : " + str(scalar)
+        regularized_weight = regularization_gradient_descent(training_features, training_outputs, 0.01, scalar)
+        train_acc = test_weight(training_features, training_outputs, regularized_weight)
+        test_acc = test_weight(testing_features, testing_outputs, regularized_weight)
+        print "Training Data Accuracy with Regularization: " + str(train_acc*100) + "%"
+        print "Testing Data Accuracy with Regularization: " + str(test_acc*100) + "%"
     
     
   
@@ -112,6 +121,12 @@ def norm_of_gradient(weight):
 def update(features, outputs, weight):
     return (outputs - sigmoid(weight, features)).dot(features)
 
+def update_regular(features, outputs, weight, scalar):
+    loss_function = (outputs - sigmoid(weight, features)).dot(features) 
+    for i, loss in enumerate(loss_function):
+        loss_function[i] += 0.5 * scalar * norm(weight)
+    return loss_function
+    
 def sigmoid(weight, features):
     #prevent overflow...a low number would round to zero anyways
     
@@ -136,8 +151,20 @@ def test_weight(features, outputs, weight):
     acc = float(right_tally) / (right_tally + wrong_tally)
     return acc
     
-def loss_function(y):
-    pass
+def regularization_gradient_descent(features, outputs, learning_rate, scalar):
+    weight = np.zeros_like(features[0], dtype=float)
+    epsilon = 0.0000001
+    iterations = 0
+ 
+    while True:
+        old_norm = norm_of_gradient(weight)
+        weight += learning_rate * update_regular(features, outputs, weight, scalar)
+        new_norm = norm_of_gradient(weight)
+        iterations += 1
+        
+        if abs(old_norm - new_norm) < epsilon:
+            print "Convered at Iteration: " + str(iterations)
+            return weight
   
 #Really cool function to show the weights
 def plot_weight(weight):
