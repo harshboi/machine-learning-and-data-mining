@@ -29,7 +29,7 @@ def main():
 
     #test_fn(training_data, testing_data)
 
-    prob1(training_data, testing_data)
+   # prob1(training_data, testing_data)
 
    # prob2(training_data)
 
@@ -44,7 +44,7 @@ def test_fn(training_data, testing_data):
 def prob1(training_data, testing_data):
     print "***** Problem 1 *****"
     for i in range(5):
-        learning_rate = float(0.1)/(10**i)
+        learning_rate = float(0.001)/(10**i)
         print "\nLearning Rate of: " + str(learning_rate)
         weight = batch_gradient_descent(training_data, learning_rate)
 
@@ -57,16 +57,16 @@ def prob1(training_data, testing_data):
         print "Testing Data Accuracy: " + str(test_acc*100) + "%"
 
 def prob2(training_data):
-    print "***** Problem 2 *****"
+    print "\n***** Problem 2 *****"
     print "....Generating Accuracy Data..."
     final_weight = batch_gradient_descent(training_data, 0.01, True)
     print "Done"
 
 def prob3(training_data, testing_data):
-    print "***** Problem 3 *****"
+    print "\n***** Problem 3 *****"
     for i in range(7):
         scalar = float(.001)*(10**i)
-        learning_rate = 0.0001/(10**i)
+        learning_rate = 0.1
         print "\nLearning Rate of: " + str(learning_rate)
         print "Using a scaler of : " + str(scalar)
         regularized_weight = batch_gradient_descent(training_data,
@@ -105,8 +105,7 @@ def extract_features_and_output(line):
 def batch_gradient_descent((features, outputs), learning_rate, regularization=None):
     weight = np.zeros_like(features[0], dtype=float)
     epsilon = 0.1
-    if regularization > 1:
-        epsilon = 100
+        
     iterations = 0
 
     while True:
@@ -119,11 +118,10 @@ def batch_gradient_descent((features, outputs), learning_rate, regularization=No
         weight += learning_rate * gradient
      
         iterations += 1
-        if iterations > 5000:
-            print norm(gradient)
-       
+      
+       # print norm(gradient)
             
-        if norm(gradient) < epsilon:
+        if norm(gradient) < epsilon or iterations >= 5000:
             print "Convered at Iteration: " + str(iterations)
             return weight
 
