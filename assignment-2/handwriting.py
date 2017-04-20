@@ -31,7 +31,7 @@ def main():
 
     prob1(training_data, testing_data)
 
-    prob2(training_data)
+   # prob2(training_data)
 
     prob3(training_data, testing_data)
 
@@ -44,8 +44,8 @@ def test_fn(training_data, testing_data):
 def prob1(training_data, testing_data):
     print "***** Problem 1 *****"
     for i in range(5):
-        learning_rate = float(10)/(10**i)
-        print "Learning Rate of: " + str(learning_rate)
+        learning_rate = float(0.1)/(10**i)
+        print "\nLearning Rate of: " + str(learning_rate)
         weight = batch_gradient_descent(training_data, learning_rate)
 
         train_acc = test_weight(training_data, weight)
@@ -66,9 +66,11 @@ def prob3(training_data, testing_data):
     print "***** Problem 3 *****"
     for i in range(7):
         scalar = float(.001)*(10**i)
+        learning_rate = 0.0001/(10**i)
+        print "\nLearning Rate of: " + str(learning_rate)
         print "Using a scaler of : " + str(scalar)
         regularized_weight = batch_gradient_descent(training_data,
-                0.01, regularization=scalar)
+                learning_rate, regularization=scalar)
         train_acc = test_weight(training_data, regularized_weight)
         test_acc = test_weight(testing_data, regularized_weight)
         print "Training Data Accuracy with Regularization: " + str(train_acc*100) + "%"
@@ -102,30 +104,35 @@ def extract_features_and_output(line):
 
 def batch_gradient_descent((features, outputs), learning_rate, regularization=None):
     weight = np.zeros_like(features[0], dtype=float)
-    epsilon = 0.0000001
+    epsilon = 0.1
+    if regularization > 1:
+        epsilon = 100
     iterations = 0
 
     while True:
-        old_norm = norm_of_gradient(weight)
-        weight += learning_rate * update(features, outputs, weight,
-                regularization)
-        new_norm = norm_of_gradient(weight)
+     
+        if not regularization:
+            gradient = update(features, outputs, weight)
+        else:
+            gradient = update(features, outputs, weight) + (regularization*weight)
+       
+        weight += learning_rate * gradient
+     
         iterations += 1
-
-        if abs(old_norm - new_norm) < epsilon:
+        if iterations > 5000:
+            print norm(gradient)
+       
+            
+        if norm(gradient) < epsilon:
             print "Convered at Iteration: " + str(iterations)
             return weight
 
 def norm_of_gradient(weight):
     return norm(np.gradient(weight))
 
-def update(features, outputs, weight, regularization):
-    if not regularization:
-        return (outputs - sigmoid(weight, features)).dot(features)
-    else:
-        return ((outputs - sigmoid(weight, features)).dot(features) +
-                0.5 * regularization * norm(weight))
-
+def update(features, outputs, weight):
+    return (outputs - sigmoid(weight, features)).dot(features)
+    
 def sigmoid(weight, features):
     exponents = weight.dot(features.T)
     results = []
