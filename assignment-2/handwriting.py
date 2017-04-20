@@ -16,9 +16,9 @@ import matplotlib.image as mpimg
 ########## Data Structures ##########
 
 # To check if output is four or nine use labels.four or labels.nine
-Data = namedtuple('Data', 'features outputs')
 Labels = namedtuple('Labels', 'four nine')
 labels = Labels(0, 1)
+Data = namedtuple('Data', 'features outputs')
 
 ########## Main ##########
 
@@ -30,11 +30,11 @@ def main():
 
     #test_fn(training_data, testing_data)
 
-    prob1(training_data, testing_data)
+    #prob1(training_data, testing_data)
 
-   # prob2(training_data)
+    #prob2(training_data)
 
-   # prob3(training_data, testing_data)
+    prob3(training_data, testing_data)
 
 ########## Problems ##########
 
@@ -67,7 +67,7 @@ def prob3(training_data, testing_data):
     print "\n***** Problem 3 *****"
     for i in range(7):
         scalar = float(.001)*(10**i)
-        learning_rate = 0.1
+        learning_rate = 10
         print "\nLearning Rate of: " + str(learning_rate)
         print "Using a scaler of : " + str(scalar)
         regularized_weight = batch_gradient_descent(training_data,
@@ -106,28 +106,22 @@ def extract_features_and_output(line):
 def batch_gradient_descent(data, learning_rate, regularization=0):
     weight = np.zeros_like(data.features[0], dtype=float)
     epsilon = 0.1
-
+    m = len(data.outputs)
     iterations = 0
 
     while True:
-
-        gradient = update(data, weight) + (regularization*weight)
-
+        gradient = update(data, weight, regularization)
         weight += learning_rate * gradient
-
         iterations += 1
-
-       # print norm(gradient)
-
         if norm(gradient) < epsilon or iterations >= 10000:
-            print "Convered at Iteration: " + str(iterations)
+            print "Converged at Iteration: " + str(iterations)
             return weight
 
-def norm_of_gradient(weight):
-    return norm(np.gradient(weight))
-
-def update(data, weight):
-    return (data.outputs - sigmoid(weight, data.features)).dot(data.features)
+def update(data, weight, regularization):
+    m = len(data.outputs)
+    return ((data.outputs -
+        sigmoid(weight, data.features)).dot(data.features) -
+        regularization * 2 * weight)
 
 def sigmoid(weight, features):
     exponents = weight.dot(features.T)
@@ -148,10 +142,8 @@ def test_weight(data, weight):
     return accuracy
 
 #Really cool function to show the weights
-def plot_weight(weight):
+def plot(weight):
     image = plt.imshow(np.reshape(weight, (16, 16)).T)
     plt.show(image)
-    while 1:
-        pass
 
 main()
