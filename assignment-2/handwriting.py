@@ -4,6 +4,7 @@
 # Assignment 2                                 #
 # Nathan Brahmstadt and Jordan Crane           #
 ################################################
+import sys
 import math
 import numpy as np
 from numpy.linalg import inv
@@ -29,11 +30,11 @@ def main():
 
     #test_fn(training_data, testing_data)
 
-   # prob1(training_data, testing_data)
+    prob1(training_data, testing_data)
 
    # prob2(training_data)
 
-    prob3(training_data, testing_data)
+   # prob3(training_data, testing_data)
 
 ########## Problems ##########
 
@@ -44,7 +45,7 @@ def test_fn(training_data, testing_data):
 def prob1(training_data, testing_data):
     print "***** Problem 1 *****"
     for i in range(5):
-        learning_rate = float(0.001)/(10**i)
+        learning_rate = 0.01/(10**i)
         print "\nLearning Rate of: " + str(learning_rate)
         weight = batch_gradient_descent(training_data, learning_rate)
 
@@ -102,35 +103,32 @@ def extract_features_and_output(line):
 
 ########## Gradient Descent ##########
 
-def batch_gradient_descent((features, outputs), learning_rate, regularization=None):
-    weight = np.zeros_like(features[0], dtype=float)
+def batch_gradient_descent(data, learning_rate, regularization=0):
+    weight = np.zeros_like(data.features[0], dtype=float)
     epsilon = 0.1
-        
+
     iterations = 0
 
     while True:
-     
-        if not regularization:
-            gradient = update(features, outputs, weight)
-        else:
-            gradient = update(features, outputs, weight) + (regularization*weight)
-       
+
+        gradient = update(data, weight) + (regularization*weight)
+
         weight += learning_rate * gradient
-     
+
         iterations += 1
-      
+
        # print norm(gradient)
-            
-        if norm(gradient) < epsilon or iterations >= 5000:
+
+        if norm(gradient) < epsilon or iterations >= 10000:
             print "Convered at Iteration: " + str(iterations)
             return weight
 
 def norm_of_gradient(weight):
     return norm(np.gradient(weight))
 
-def update(features, outputs, weight):
-    return (outputs - sigmoid(weight, features)).dot(features)
-    
+def update(data, weight):
+    return (data.outputs - sigmoid(weight, data.features)).dot(data.features)
+
 def sigmoid(weight, features):
     exponents = weight.dot(features.T)
     results = []
@@ -142,17 +140,12 @@ def sigmoid(weight, features):
             results.append(1 - 1 / (1 + math.exp(exponent)))
     return np.array(results)
 
-def test_weight((features, outputs), weight):
-    guesses = sigmoid(weight, features)
-    right_tally = 0
-    wrong_tally = 0
-    for i, guess in enumerate(guesses):
-        if abs(guess-outputs[i]) <= 0.5:
-            right_tally += 1
-        else:
-            wrong_tally += 1
-    acc = float(right_tally) / (right_tally + wrong_tally)
-    return acc
+def test_weight(data, weight):
+    probabilities = sigmoid(weight, data.features)
+    guesses = np.round(probabilities)
+    m = float(len(data.outputs))
+    accuracy = (m - sum(abs(guesses - data.outputs))) / m
+    return accuracy
 
 #Really cool function to show the weights
 def plot_weight(weight):
@@ -162,31 +155,3 @@ def plot_weight(weight):
         pass
 
 main()
-
-#def batch_gradient_descent(features, outputs, learning_rate,
-#        collect_acc_flag=False, regularization=None):
-#    weight = np.zeros_like(features[0], dtype=float)
-#    #learning_rate = 0.01
-#    epsilon = 0.0000001
-#    iterations = 0
-#
-#    if collect_acc_flag == True:
-#        acc_file = open("data/acc_data.txt", 'w')
-#        (testing_features, testing_outputs) = get_data_arrays(
-#            "data/usps-4-9-test.csv")
-#
-#    while True:
-#        old_norm = norm_of_gradient(weight)
-#        weight += learning_rate * np.gradient(update(features, outputs, weight,
-#                regularization))
-#        new_norm = norm_of_gradient(weight)
-#        iterations += 1
-#
-#        if collect_acc_flag == True:
-#            test_acc = test_weight(testing_features, testing_outputs, weight)
-#            train_acc = test_weight(features, outputs, weight)
-#            acc_file.write(str(train_acc) + "," + str(test_acc) + "\n")
-#
-#        if abs(old_norm - new_norm) < epsilon:
-#            print "Convered at Iteration: " + str(iterations)
-#            return weight
