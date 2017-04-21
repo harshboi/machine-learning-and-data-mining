@@ -59,11 +59,11 @@ def prob2(training_data, testing_data):
 
 def prob3(training_data, testing_data):
     print "\n***** Problem 3 *****"
-    for i in range(7):
+    for i in range(6):
         scalar = float(.001)*(10**i)
-        learning_rate = .0000001
+        learning_rate = .01
         print "\nLearning Rate of: " + str(learning_rate)
-        print "Using a scaler of : " + str(scalar)
+        print "Using lambda : " + str(scalar)
         regularized_weight = batch_gradient_descent(training_data,
                 learning_rate, regularization=scalar)
         train_acc = test_weight(training_data, regularized_weight)
@@ -99,7 +99,7 @@ def extract_features_and_output(line):
 
 def batch_gradient_descent(data, learning_rate, collect_accuracy_flag=False, regularization=0):
     weight = np.zeros_like(data.features[0], dtype=float)
-    epsilon = 0.1
+    epsilon = 0.001
     m = len(data.outputs)
     iterations = 0
 
@@ -107,17 +107,17 @@ def batch_gradient_descent(data, learning_rate, collect_accuracy_flag=False, reg
 		acc_file = open("data/acc_data.txt", 'w')
 		test_data = get_data_arrays(
 			"data/usps-4-9-test.csv")
-    
+
     while True:
         gradient = update(data, weight, regularization)
         weight += learning_rate * gradient
         iterations += 1
-           
+
         if collect_accuracy_flag == True:
 			test_acc = test_weight(test_data, weight)
 			train_acc = test_weight(data, weight)
-			acc_file.write(str(train_acc) + "," + str(test_acc) + "\n")   
-           
+			acc_file.write(str(train_acc) + "," + str(test_acc) + "\n")
+
         if norm(gradient) < epsilon or iterations >= 5000:
             print "Converged at Iteration: " + str(iterations)
             return weight
