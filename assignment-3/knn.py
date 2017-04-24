@@ -22,6 +22,12 @@ class Data:
         (self.features, self.outputs) = self._build_data_arrays(file)
         file.close()
 
+    def normalize(self):
+        features_max = np.amax(self.features, axis=0)
+        features_min = np.amin(self.features, axis=0)
+        features_spread = features_max - features_min
+        self.features = (self.features - features_min) / features_spread
+
     def _build_data_arrays(self, file):
         (features, outputs) = self._build_data_lists(file)
         return (np.array(features, dtype=float), np.array(outputs, dtype=int))
@@ -38,19 +44,20 @@ class Data:
         features_and_output = line.split(',')
         return (features_and_output[1:], features_and_output[0])
 
-    def normalize_features(self):
-        features_max = np.amax(self.features, axis=0)
-        features_min = np.amin(self.features, axis=0)
-        features_spread = features_max - features_min
-        self.features = (self.features - features_min) / features_spread
-
 class Knn:
     def __init__(self, training_data):
         self.training_data = training_data
 
-    def test(self, data, k=3):
-        outputs = map(lambda instance: self._classify(instance, k), data.features)
-        print outputs
+    def get_testing_error(self, data, k=1):
+        outputs = self._test(data, k)
+        return sum(abs(outputs - data.outputs))/2
+
+    def get_training_error(self, k=1):
+        outputs = self._test(self.training_data, k)
+        return sum(abs(outputs - self.training_data.outputs))/2
+
+    def _test(self, data, k):
+        return map(lambda instance: self._classify(instance, k), data.features)
 
     def _classify(self, test_instance, k):
         neighbors = self._get_nearest_neighbors(test_instance)
@@ -69,10 +76,30 @@ class Knn:
 
         return sorted(neigbors, key=attrgetter('distance'))
 
-training_data = Data('data/knn_train.csv')
-testing_data = Data('data/knn_test.csv')
-training_data.normalize_features()
-testing_data.normalize_features()
+class Main:
+    def __init__(self):
+        self.training_data = Data('data/knn_train.csv')
+        self.testing_data = Data('data/knn_test.csv')
+        self.training_data.normalize()
+        self.testing_data.normalize()
 
-model = Knn(training_data)
-model.test(testing_data)
+    def run(self):
+        self._part_1()
+        self._part_2()
+        self._extra_credit()
+
+    def _part_1(self):
+        model = Knn(self.training_data)
+        for k in range(1, 52, 2):
+            print "K-value: ", k
+            print "Training Error: ", model.get_training_error(k=k)
+            print "Testing Error: ", model.get_testing_error(self.testing_data, k=k)
+
+    def _part_2(self):
+        return
+
+    def _extra_credit(self):
+        return
+
+main = Main()
+main.run()
