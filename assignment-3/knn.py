@@ -17,6 +17,23 @@ import matplotlib.image as mpimg
 DistanceOutputPair = namedtuple('DistanceOutputPair', 'distance output')
 FeatureOutputPair = namedtuple('FeatureOutputPair', 'features output')
 
+class CsvPrinter:
+    def __init__(self, filename, labels=[], delimiter=','):
+        if labels:
+            self.file = open(filename, 'w')
+            self.columns = len(labels)
+            labels.append('\n')
+            self.delimiter = delimiter
+            self.file.write(self.delimiter.join(labels))
+
+    def writerow(self, data):
+        if len(data) == self.columns:
+            data.append('\n')
+            self.file.write(self.delimiter.join([str(x) for x in data]))
+
+    def close(self):
+        self.file.close()
+
 class Data:
     def __init__(self, filename=None, features=None, outputs=None):
         if filename:
@@ -116,24 +133,30 @@ class Main:
         self._extra_credit()
 
     def _part_1(self):
+        csv = CsvPrinter('reports/part_1.csv',
+                labels=['k',
+                    'Training Error',
+                    'Testing Error',
+                    'Leave-one-out Error']
+                )
         model = Knn(self.training_data)
         for k in range(1, 52, 2):
+            training_err = model.get_training_error(k=k)
+            testing_err = model.get_testing_error(self.testing_data, k=k)
+            cv_err = model.get_cross_validation_error(k=k)
             print "---------------------------"
             print "K-value: ", k
             print "".join(["Training Error: ",
-                str(round(model.get_training_error(k=k), 4) * 100),
-                "%"]
+                str(round(training_err, 4) * 100), "%"]
                 )
             print "".join(["Leave-One-Out Error: ",
-                str(round(model.get_cross_validation_error(k=k), 4) * 100),
-                "%"]
+                str(round(cv_err, 4) * 100), "%"]
                 )
-            print "".join([
-                "Testing Error: ",
-                str(round(
-                    model.get_testing_error(self.testing_data, k=k), 4) * 100),
-                "%"]
+            print "".join(["Testing Error: ",
+                str(round(testing_err, 4) * 100), "%"]
                 )
+            csv.writerow([k, training_err, testing_err, cv_err])
+        csv.close()
 
     def _part_2(self):
         return
