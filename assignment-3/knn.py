@@ -93,6 +93,7 @@ class Knn:
         return (sum(abs(outputs - self.training_data.outputs)) /
                 float(2 * len(self.training_data.outputs)))
 
+    # Specifically for leave-one-out cross-validation
     def get_cross_validation_error(self, k=1):
         total_error = 0
         for i in range(len(self.training_data.features)):
