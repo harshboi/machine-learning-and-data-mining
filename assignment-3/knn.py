@@ -7,12 +7,8 @@
 
 import math
 import numpy as np
-from numpy.linalg import inv
-from numpy.linalg import norm
 from collections import namedtuple
 from operator import attrgetter
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
 
 DistanceOutputPair = namedtuple('DistanceOutputPair', 'distance output')
 FeatureOutputPair = namedtuple('FeatureOutputPair', 'features output')
@@ -25,11 +21,17 @@ class CsvPrinter:
             labels.append('\n')
             self.delimiter = delimiter
             self.file.write(self.delimiter.join(labels))
+        else:
+            print "CsvPrinter: Please provide column labels"
+            exit()
 
     def writerow(self, data):
         if len(data) == self.columns:
             data.append('\n')
             self.file.write(self.delimiter.join([str(x) for x in data]))
+        else:
+            print "CsvPrinter: Data length should match number of labels"
+            exit()
 
     def close(self):
         self.file.close()
@@ -95,8 +97,8 @@ class Knn:
         total_error = 0
         for i in range(len(self.training_data.features)):
             left_out = self.training_data.leave_out(i)
-            result = self._classify(left_out.features, k)
-            total_error += abs(left_out.output - result)/2
+            output = self._classify(left_out.features, k)
+            total_error += abs(left_out.output - output)/2
         self.training_data.include_all()
         return float(total_error) / len(self.training_data.outputs)
 
@@ -105,8 +107,8 @@ class Knn:
 
     def _classify(self, test_instance, k):
         neighbors = self._get_nearest_neighbors(test_instance)
-        result = sum([tuple.output for tuple in neighbors[:k]])
-        if result < 0: return -1
+        output = sum([neigbor.output for neigbor in neighbors[:k]])
+        if output < 0: return -1
         else: return 1
 
     def _get_nearest_neighbors(self, test_instance):
@@ -133,12 +135,8 @@ class Main:
         self._extra_credit()
 
     def _part_1(self):
-        csv = CsvPrinter('reports/part_1.csv',
-                labels=['k',
-                    'Training Error',
-                    'Testing Error',
-                    'Leave-one-out Error']
-                )
+        labels=['k', 'Training Error', 'Testing Error', 'Leave-one-out Error']
+        csv = CsvPrinter('reports/part_1.csv', labels)
         model = Knn(self.training_data)
         for k in range(1, 52, 2):
             training_err = model.get_training_error(k=k)
@@ -156,6 +154,7 @@ class Main:
                 str(round(testing_err, 4) * 100), "%"]
                 )
             csv.writerow([k, training_err, testing_err, cv_err])
+        print "---------------------------"
         csv.close()
 
     def _part_2(self):
@@ -164,6 +163,5 @@ class Main:
     def _extra_credit(self):
         return
 
-np.set_printoptions(suppress=True)
 main = Main()
 main.run()
