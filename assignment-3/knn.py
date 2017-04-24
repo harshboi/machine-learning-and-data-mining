@@ -15,18 +15,35 @@ import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
 DistOutputPair = namedtuple('DistOutputPair', 'distance output')
+FeatureOutputPair = namedtuple('FeatureOutputPair', 'features output')
 
 class Data:
-    def __init__(self, filename):
-        file = open(filename)
-        (self.features, self.outputs) = self._build_data_arrays(file)
-        file.close()
+    def __init__(self, filename=None, features=None, outputs=None):
+        if filename:
+            file = open(filename)
+            (self.features, self.outputs) = self._build_data_arrays(file)
+            file.close()
+        elif features and outputs:
+            self.features = features
+            self.outputs = outputs
+        self._features = self.features
+        self._outputs = self.outputs
 
     def normalize(self):
         features_max = np.amax(self.features, axis=0)
         features_min = np.amin(self.features, axis=0)
         features_spread = features_max - features_min
         self.features = (self.features - features_min) / features_spread
+        self._features = self.features
+
+    def leave_out(self, index):
+        self.features = np.delete(self._features, index, axis=0)
+        self.outputs = np.delete(self._outputs, index, axis=0)
+        return FeatureOutputPair(self._features[index], self._outputs[index])
+
+    def include_all(self):
+        self.features = self._features
+        self.outputs = self._outputs
 
     def _build_data_arrays(self, file):
         (features, outputs) = self._build_data_lists(file)
@@ -50,11 +67,21 @@ class Knn:
 
     def get_testing_error(self, data, k=1):
         outputs = self._test(data, k)
-        return sum(abs(outputs - data.outputs))/2
+        return (sum(abs(outputs - data.outputs)) / float(2 * len(data.outputs)))
 
     def get_training_error(self, k=1):
         outputs = self._test(self.training_data, k)
-        return sum(abs(outputs - self.training_data.outputs))/2
+        return (sum(abs(outputs - self.training_data.outputs)) /
+                float(2 * len(self.training_data.outputs)))
+
+    def get_cross_validation_error(self, k=1):
+        total_error = 0
+        for i in range(len(self.training_data.features)):
+            left_out = self.training_data.leave_out(i)
+            result = self._classify(left_out.features, k)
+            total_error += abs(left_out.output - result)/2
+        self.training_data.include_all()
+        return float(total_error) / len(self.training_data.outputs)
 
     def _test(self, data, k):
         return map(lambda instance: self._classify(instance, k), data.features)
@@ -91,9 +118,22 @@ class Main:
     def _part_1(self):
         model = Knn(self.training_data)
         for k in range(1, 52, 2):
+            print "---------------------------"
             print "K-value: ", k
-            print "Training Error: ", model.get_training_error(k=k)
-            print "Testing Error: ", model.get_testing_error(self.testing_data, k=k)
+            print "".join(["Training Error: ",
+                str(round(model.get_training_error(k=k), 4) * 100),
+                "%"]
+                )
+            print "".join(["Leave-One-Out Error: ",
+                str(round(model.get_cross_validation_error(k=k), 4) * 100),
+                "%"]
+                )
+            print "".join([
+                "Testing Error: ",
+                str(round(
+                    model.get_testing_error(self.testing_data, k=k), 4) * 100),
+                "%"]
+                )
 
     def _part_2(self):
         return
@@ -101,5 +141,6 @@ class Main:
     def _extra_credit(self):
         return
 
+np.set_printoptions(suppress=True)
 main = Main()
 main.run()
