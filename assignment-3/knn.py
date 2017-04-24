@@ -14,7 +14,7 @@ from operator import attrgetter
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
-DistOutputPair = namedtuple('DistOutputPair', 'distance output')
+DistanceOutputPair = namedtuple('DistanceOutputPair', 'distance output')
 FeatureOutputPair = namedtuple('FeatureOutputPair', 'features output')
 
 class Data:
@@ -98,7 +98,7 @@ class Knn:
                 axis=1
                 ))
 
-        neigbors = map(DistOutputPair, distances,
+        neigbors = map(DistanceOutputPair, distances,
             self.training_data.outputs)
 
         return sorted(neigbors, key=attrgetter('distance'))
