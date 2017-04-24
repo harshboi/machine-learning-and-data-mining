@@ -137,7 +137,7 @@ def part_1():
     csv = CsvPrinter('reports/part_1.csv', labels)
     model = Knn(training_data)
 
-    def _print(k, training_err, testing_err, cv_err):
+    def _print_results():
         print "---------------------------"
         print "K-value: ", k
         print "".join(["Training Error: ",
@@ -154,7 +154,7 @@ def part_1():
         training_err = model.get_training_error(k=k)
         testing_err = model.get_testing_error(testing_data, k=k)
         cv_err = model.get_cross_validation_error(k=k)
-        _print(k, training_err, testing_err, cv_err)
+        _print_results()
         csv.writerow([k, training_err, testing_err, cv_err])
     print "---------------------------"
     csv.close()
