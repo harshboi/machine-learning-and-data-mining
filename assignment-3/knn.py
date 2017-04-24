@@ -122,46 +122,47 @@ class Knn:
 
         return sorted(neigbors, key=attrgetter('distance'))
 
-class Main:
-    def __init__(self):
-        self.training_data = Data('data/knn_train.csv')
-        self.testing_data = Data('data/knn_test.csv')
-        self.training_data.normalize()
-        self.testing_data.normalize()
+training_data = Data('data/knn_train.csv')
+testing_data = Data('data/knn_test.csv')
+training_data.normalize()
+testing_data.normalize()
 
-    def run(self):
-        self._part_1()
-        self._part_2()
-        self._extra_credit()
+def main():
+    part_1()
+    part_2()
+    extra_credit()
 
-    def _part_1(self):
-        labels=['k', 'Training Error', 'Testing Error', 'Leave-one-out Error']
-        csv = CsvPrinter('reports/part_1.csv', labels)
-        model = Knn(self.training_data)
-        for k in range(1, 52, 2):
-            training_err = model.get_training_error(k=k)
-            testing_err = model.get_testing_error(self.testing_data, k=k)
-            cv_err = model.get_cross_validation_error(k=k)
-            print "---------------------------"
-            print "K-value: ", k
-            print "".join(["Training Error: ",
-                str(round(training_err, 4) * 100), "%"]
-                )
-            print "".join(["Leave-One-Out Error: ",
-                str(round(cv_err, 4) * 100), "%"]
-                )
-            print "".join(["Testing Error: ",
-                str(round(testing_err, 4) * 100), "%"]
-                )
-            csv.writerow([k, training_err, testing_err, cv_err])
+def part_1():
+    labels=['k', 'Training Error', 'Testing Error', 'Leave-one-out Error']
+    csv = CsvPrinter('reports/part_1.csv', labels)
+    model = Knn(training_data)
+
+    def _print(k, training_err, testing_err, cv_err):
         print "---------------------------"
-        csv.close()
+        print "K-value: ", k
+        print "".join(["Training Error: ",
+            str(round(training_err, 4) * 100), "%"]
+            )
+        print "".join(["Leave-One-Out Error: ",
+            str(round(cv_err, 4) * 100), "%"]
+            )
+        print "".join(["Testing Error: ",
+            str(round(testing_err, 4) * 100), "%"]
+            )
 
-    def _part_2(self):
-        return
+    for k in range(1, 52, 2):
+        training_err = model.get_training_error(k=k)
+        testing_err = model.get_testing_error(testing_data, k=k)
+        cv_err = model.get_cross_validation_error(k=k)
+        _print(k, training_err, testing_err, cv_err)
+        csv.writerow([k, training_err, testing_err, cv_err])
+    print "---------------------------"
+    csv.close()
 
-    def _extra_credit(self):
-        return
+def part_2():
+    return
 
-main = Main()
-main.run()
+def extra_credit():
+    return
+
+if __name__ == '__main__':main()
