@@ -181,7 +181,7 @@ class Stump:
         less_p = ((float)(less_than_split_pos+less_than_split_neg)/data_points)*less_entropy
         
         gain = initial_uncertainty - greater_p - less_p
-        
+    
         return gain
         
     def _entropy(self, pos, neg):
@@ -200,7 +200,26 @@ class Stump:
             else:
                 neg += 1
         return self._entropy(pos, neg)
-        
+     
+    def accuracy(self, data):
+        prediction = 0
+        correct = 0
+        wrong = 0
+        for i, x in enumerate(data.features):
+            if x[self.trained_feature] > self.trained_split:
+                prediction = 1
+            else:
+                prediction = -1
+              
+            if prediction == data.outputs[i]:
+                correct += 1
+            else:
+                wrong += 1
+                
+        return float(correct)/(correct+wrong)
+            
+                
+     
 training_data = Data('data/knn_train.csv')
 testing_data = Data('data/knn_test.csv')
 training_data.normalize()
@@ -241,11 +260,13 @@ def part_1():
 def part_2():
     model = Stump(training_data)
     model.train_stump()
-    
- 
+    print "----------Part 2-----------"
     print "Split if Value is > " + str(model.trained_split) + " On feature " + str(model.trained_feature)
     print "Information Gain of " + str(model.trained_information_gain)
     
+    print "Training Accuracy: " + str(model.accuracy(training_data))
+    print "Testing Accuracy: " + str(model.accuracy(testing_data))
+    print "---------------------------"
     return
 
 def extra_credit():
