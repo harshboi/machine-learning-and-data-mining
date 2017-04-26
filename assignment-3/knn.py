@@ -6,6 +6,7 @@
 ################################################
 
 import math
+from math import log
 import numpy as np
 from collections import namedtuple
 from operator import attrgetter
@@ -123,13 +124,90 @@ class Knn:
 
         return sorted(neigbors, key=attrgetter('distance'))
 
+class Stump:    
+    
+    def __init__(self, training_data):
+        self.training_data = training_data
+        self.trained_information_gain = None
+        self.trained_feature = None
+        self.trained_split = None
+    
+    def train_stump(self):
+        data_points, feature_number = self.training_data.features.shape
+        self.trained_information_gain = 0
+        self.trained_feature = 0
+        self.trained_split = 0
+        #increment through each feature
+        for i in range(0,feature_number):
+   
+            #test information gain using data point as a boundary
+            for j in self.training_data.features.T[i]:
+                boundary_value = j
+                cur_information_gain = self._information_gain(i, j)
+                if self.trained_information_gain < cur_information_gain:
+                    self.trained_information_gain = cur_information_gain
+                    self.trained_feature= i
+                    self.trained_split = j
+                
+
+      
+        
+    def _information_gain(self, feature, boundary_value):
+    
+        initial_uncertainty = self._initial_uncertainty()
+    
+        data_points, feature_number = self.training_data.features.shape
+        greater_than_split_pos = 0
+        greater_than_split_neg = 0
+        less_than_split_pos = 0
+        less_than_split_neg = 0
+        
+       
+        for j, value in enumerate(self.training_data.features.T[feature]):
+            if value > boundary_value:
+                if self.training_data.outputs[j] > 0:
+                    greater_than_split_pos += 1
+                else:
+                    greater_than_split_neg += 1
+            else:
+                if self.training_data.outputs[j] > 0:
+                    less_than_split_pos += 1
+                else:
+                    less_than_split_neg += 1
+        greater_entropy = self._entropy(greater_than_split_pos, greater_than_split_neg)
+        greater_p = ((float)(greater_than_split_pos+greater_than_split_neg)/data_points)*greater_entropy
+        
+        less_entropy = self._entropy(less_than_split_pos, less_than_split_neg)
+        less_p = ((float)(less_than_split_pos+less_than_split_neg)/data_points)*less_entropy
+        
+        gain = initial_uncertainty - greater_p - less_p
+        
+        return gain
+        
+    def _entropy(self, pos, neg):
+        sum = pos+neg
+        if pos == 0 or neg == 0:
+            return 0
+        else:
+            return -(((float)(pos)/sum)*log(((float)(pos)/sum),2)) - (((float)(neg)/sum)*log(((float)(neg)/sum),2))
+     
+    def _initial_uncertainty(self):
+        pos = 0
+        neg = 0
+        for i in self.training_data.outputs:
+            if i > 0:
+                pos += 1
+            else:
+                neg += 1
+        return self._entropy(pos, neg)
+        
 training_data = Data('data/knn_train.csv')
 testing_data = Data('data/knn_test.csv')
 training_data.normalize()
 testing_data.normalize()
 
 def main():
-    part_1()
+    #part_1()
     part_2()
     extra_credit()
 
@@ -161,6 +239,13 @@ def part_1():
     csv.close()
 
 def part_2():
+    model = Stump(training_data)
+    model.train_stump()
+    
+ 
+    print "Split if Value is > " + str(model.trained_split) + " On feature " + str(model.trained_feature)
+    print "Information Gain of " + str(model.trained_information_gain)
+    
     return
 
 def extra_credit():
