@@ -44,8 +44,8 @@ class Data:
             (self.features, self.outputs) = self._build_data_arrays(file)
             file.close()
         elif features and outputs:
-            self.features = features
-            self.outputs = outputs
+            self.features = np.array(features, dtype=float)
+            self.outputs = np.array(outputs, dtype=float)
         self._features = self.features
         self._outputs = self.outputs
 
@@ -131,8 +131,9 @@ class Stump:
         self.trained_information_gain = None
         self.trained_feature = None
         self.trained_split = None
+        self._train()
     
-    def train_stump(self):
+    def _train(self):
         data_points, feature_number = self.training_data.features.shape
         self.trained_information_gain = 0
         self.trained_feature = 0
@@ -217,9 +218,151 @@ class Stump:
                 wrong += 1
                 
         return float(correct)/(correct+wrong)
-            
-                
+                  
+
+class Treenode:
+    
+    def __init__(self, data, max_depth, height):
+    
+        #intrinsic to node
+      
+        self.training_data = data
+        self.prediction = sum(data.outputs)
+        self.max_depth = max_depth
+        self.height = height
+        
+        #learned variables
+        self.trained_information_gain = None
+        self.trained_feature = None
+        self.trained_split = None       
+        
+        if self.max_depth > 0:
+            self._train()
+            if self.trained_information_gain > 0:
+                data_r, data_l = self._split_data(self.training_data, self.trained_feature, self.trained_split)
+                self.child_r = Treenode(data_r, self.max_depth-1, self.height+1)
+                self.child_l = Treenode(data_l, self.max_depth-1, self.height+1)
+            else:
+                #We can't learn anything more from this node...all data has same output
+                self.max_depth = 0
      
+    def _train(self):
+        data_points, feature_number = self.training_data.features.shape
+        self.trained_information_gain = 0
+        self.trained_feature = 0
+        self.trained_split = 0
+        #increment through each feature
+        for i in range(0,feature_number):
+   
+            #test information gain using data point as a boundary
+            for j in self.training_data.features.T[i]:
+                boundary_value = j
+                cur_information_gain = self._information_gain(i, j)
+                if self.trained_information_gain < cur_information_gain:
+                    self.trained_information_gain = cur_information_gain
+                    self.trained_feature= i
+                    self.trained_split = j
+               
+        
+    def _information_gain(self, feature, boundary_value):
+    
+        initial_uncertainty = self._initial_uncertainty()
+    
+        data_points, feature_number = self.training_data.features.shape
+        greater_than_split_pos = 0
+        greater_than_split_neg = 0
+        less_than_split_pos = 0
+        less_than_split_neg = 0
+        
+       
+        for j, value in enumerate(self.training_data.features.T[feature]):
+            if value > boundary_value:
+                if self.training_data.outputs[j] > 0:
+                    greater_than_split_pos += 1
+                else:
+                    greater_than_split_neg += 1
+            else:
+                if self.training_data.outputs[j] > 0:
+                    less_than_split_pos += 1
+                else:
+                    less_than_split_neg += 1
+        greater_entropy = self._entropy(greater_than_split_pos, greater_than_split_neg)
+        greater_p = ((float)(greater_than_split_pos+greater_than_split_neg)/data_points)*greater_entropy
+        
+        less_entropy = self._entropy(less_than_split_pos, less_than_split_neg)
+        less_p = ((float)(less_than_split_pos+less_than_split_neg)/data_points)*less_entropy
+        
+        gain = initial_uncertainty - greater_p - less_p
+    
+        return gain
+        
+    def _entropy(self, pos, neg):
+        sum = pos+neg
+        if pos == 0 or neg == 0:
+            return 0
+        else:
+            return -(((float)(pos)/sum)*log(((float)(pos)/sum),2)) - (((float)(neg)/sum)*log(((float)(neg)/sum),2))
+     
+    def _initial_uncertainty(self):
+        pos = 0
+        neg = 0
+        for i in self.training_data.outputs:
+            if i > 0:
+                pos += 1
+            else:
+                neg += 1
+        return self._entropy(pos, neg)
+     
+    def accuracy(self, data):
+        prediction = 0
+        correct = 0
+        wrong = 0
+        for i, x in enumerate(data.features):
+            if x[self.trained_feature] > self.trained_split:
+                prediction = 1
+            else:
+                prediction = -1
+              
+            if prediction == data.outputs[i]:
+                correct += 1
+            else:
+                wrong += 1
+                
+        return float(correct)/(correct+wrong)
+    
+    def _split_data(self, data, feature, value):
+        features_l = []
+        outputs_l = []
+        features_r = []
+        outputs_r = []
+        for i, x in enumerate(data.features):
+            if x[feature] > value:
+                features_r.append(x)
+                outputs_r.append(data.outputs[i])
+            else:
+                features_l.append(x)
+                outputs_l.append(data.outputs[i])
+
+        data_r = Data(features = features_r, outputs = outputs_r)
+     
+        data_l = Data(features = features_l, outputs = outputs_l)
+       
+        return data_r, data_l
+                
+    def print_tree(self):
+        if self.max_depth > 0:
+            print "\t"*self.height + "If feature " + str(self.trained_feature) + " is > " + str(self.trained_split)
+            self.child_r.print_tree()
+            print "\t"*self.height + "If feature " + str(self.trained_feature) + " is <= " + str(self.trained_split)
+            self.child_l.print_tree()
+            print "\t"*self.height + "Information Gain of this Split: " + str(self.trained_information_gain)
+        else:
+            if self.prediction > 0:
+                print "\t"*self.height + "Predict Positive"
+            elif self.prediction < 0:
+                print "\t"*self.height + "Predict Negative"
+            else:
+                print "\t"*self.height + "Unable to predict..."
 training_data = Data('data/knn_train.csv')
 testing_data = Data('data/knn_test.csv')
 training_data.normalize()
@@ -259,14 +402,20 @@ def part_1():
 
 def part_2():
     model = Stump(training_data)
-    model.train_stump()
+    
     print "----------Part 2-----------"
+    print "Stump Results:"
     print "Split if Value is > " + str(model.trained_split) + " On feature " + str(model.trained_feature)
     print "Information Gain of " + str(model.trained_information_gain)
     
     print "Training Accuracy: " + str(model.accuracy(training_data))
     print "Testing Accuracy: " + str(model.accuracy(testing_data))
     print "---------------------------"
+    print "Tree of Depth 6 Results:"
+    rootnode = Treenode(training_data, 5, 0)
+    rootnode.print_tree()
+    
+    
     return
 
 def extra_credit():
