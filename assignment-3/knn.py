@@ -318,17 +318,25 @@ class Treenode:
         correct = 0
         wrong = 0
         for i, x in enumerate(data.features):
-            if x[self.trained_feature] > self.trained_split:
-                prediction = 1
-            else:
-                prediction = -1
               
-            if prediction == data.outputs[i]:
+            if self._descend_tree(x) == data.outputs[i]:
                 correct += 1
             else:
                 wrong += 1
                 
         return float(correct)/(correct+wrong)
+    
+    def _descend_tree(self, data):
+        if self.max_depth > 0:
+            if data[self.trained_feature] > self.trained_split:
+                return self.child_r._descend_tree(data)
+            else:
+                return self.child_l._descend_tree(data)
+        else:
+            if self.prediction > 0:
+                return 1
+            else:
+                return -1
     
     def _split_data(self, data, feature, value):
         features_l = []
@@ -412,8 +420,12 @@ def part_2():
     print "Testing Accuracy: " + str(model.accuracy(testing_data))
     print "---------------------------"
     print "Tree of Depth 6 Results:"
+    print ""
     rootnode = Treenode(training_data, 5, 0)
     rootnode.print_tree()
+    print ""
+    print "Training Accuracy: " + str(rootnode.accuracy(training_data))
+    print "Testing Accuracy: " + str(rootnode.accuracy(testing_data))
     
     
     return
