@@ -377,7 +377,7 @@ training_data.normalize()
 testing_data.normalize()
 
 def main():
-    #part_1()
+    part_1()
     part_2()
     extra_credit()
 
@@ -431,6 +431,44 @@ def part_2():
     return
 
 def extra_credit():
+    print "----------Extra Credit-----------"
+    labels=['k', 'Training Error', 'Testing Error', 'Leave-one-out Error']
+    csv = CsvPrinter('reports/extra_credit.csv', labels)
+    
+    #We want features 22, 27, 1, 4, 9, 29, 21
+
+    for i in range(30):
+        if not (29-i) in {22, 27, 1, 4, 9, 29, 21}:
+            training_data.features = np.delete(training_data.features, (29-i), axis=1)
+            training_data._features = np.delete(training_data._features, (29-i), axis=1)
+            testing_data.features = np.delete(testing_data.features, (29-i), axis=1)
+            testing_data._features = np.delete(testing_data._features, (29-i), axis=1)
+           # training_data.outputs = np.delete(training_data.outputs, i, axis=0)
+
+    model = Knn(training_data)
+
+    def _print_results():
+        print "---------------------------"
+        print "K-value: ", k
+        print "".join(["Training Error: ",
+            str(round(training_err, 4) * 100), "%"]
+            )
+        print "".join(["Leave-One-Out Error: ",
+            str(round(cv_err, 4) * 100), "%"]
+            )
+        print "".join(["Testing Error: ",
+            str(round(testing_err, 4) * 100), "%"]
+            )
+
+    for k in range(1, 52, 2):
+        training_err = model.get_training_error(k=k)
+        testing_err = model.get_testing_error(testing_data, k=k)
+        cv_err = model.get_cross_validation_error(k=k)
+        _print_results()
+        csv.writerow([k, training_err, testing_err, cv_err])
+    print "---------------------------"
+    csv.close()
+    
     return
 
 if __name__ == '__main__':main()
