@@ -17,6 +17,16 @@ class Cluster:
     def __init__(self, center, points=[]):
         self.center = center
         self.points = points
+    def update_center(self):
+        self.center = np.mean(self.points, axis=0)
+        del self.points[:]
+    def similarity(self, x):
+        #Euclidian Distance
+        return np.sum(np.square(self.center - x))
+        #Manhattan Distance
+        #return np.sum(np.absolute(self.center - x))
+        #Cosine Similarity
+        #return np.sum(self.center*x)/(np.sum(np.square(self.center))*np.sum(np.square(x)))
 
 class Data:
     def __init__(self, filename=None):
@@ -42,43 +52,49 @@ class Data:
 
 class Kmeans:
     def __init__(self, data, k=2):
-        self.data = data
-        self.k = k
-        self.clusters = []
+        self._data = data
+        self._k = k
+        self._clusters = []
+        self._previous_cluster_sizes = []
         self._initialize_clusters()
 
     def cluster(self):
         converged = False
         while not converged:
-            for x in self.data:
-                self._assign(x)
-            self._update()
+            for x in self._data:
+                self._assign_point(x)
+            if self._check_convergence():
+                converged = True
+                print "Converged!"
+            else:
+                self._update_centers()
 
-    def _assign(self, x):
-        min_d = sys.maxint
-        for cluster in self.clusters:
-            print min_d
-            d = self._distance(cluster.center, x)
-            if d < min_d:
-                min_d = d
+    def _assign_point(self, x):
+        min_error = sys.maxint
+        for cluster in self._clusters:
+            error = cluster.similarity(x)
+            if error < min_error:
+                min_error = error
                 choice = cluster
         choice.points.append(x)
 
-    def _update(self):
-        for i, cluster in enumerate(self.clusters):
-            new_center = 1 / len(cluster.points) * np.sum(cluster.points)
-            cluster.center = new_center
-
-    def _distance(self, a, b):
-        return np.sum(np.absolute(a - b))
-        return np.sum(a*b)/(np.sum(np.square(a))*np.sum(np.square(b)))
+    def _update_centers(self):
+        del self._previous_cluster_sizes[:]
+        for cluster in self._clusters:
+            self._previous_cluster_sizes.append(len(cluster.points))
+            cluster.update_center()
 
     def _initialize_clusters(self):
-        indexes = np.random.choice(len(self.data), self.k, replace=False)
-        print indexes
+        indexes = np.random.choice(len(self._data), self._k, replace=False)
         for i in indexes:
-            print self.data[i]
-            self.clusters.append(Cluster(self.data[i], []))
+            self._clusters.append(Cluster(self._data[i], []))
+
+    def _check_convergence(self):
+        cluster_sizes = []
+        for cluster in self._clusters:
+            cluster_sizes.append(len(cluster.points))
+        print cluster_sizes
+        return cluster_sizes == self._previous_cluster_sizes
 
 def main():
     data = Data("data/data.txt")
