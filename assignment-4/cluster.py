@@ -13,20 +13,28 @@ import random
 from collections import namedtuple
 from operator import attrgetter
 
-class Cluster:
-    def __init__(self, center, points=[]):
-        self.center = center
-        self.points = points
-    def update_center(self):
-        self.center = np.mean(self.points, axis=0)
-        del self.points[:]
-    def similarity(self, x):
-        #Euclidian Distance
-        return np.sum(np.square(self.center - x))
-        #Manhattan Distance
-        #return np.sum(np.absolute(self.center - x))
-        #Cosine Similarity
-        #return np.sum(self.center*x)/(np.sum(np.square(self.center))*np.sum(np.square(x)))
+class CsvPrinter:
+    def __init__(self, filename, labels=[], delimiter=','):
+        if labels:
+            self.file = open(filename, 'w')
+            self.columns = len(labels)
+            labels.append('\n')
+            self.delimiter = delimiter
+            self.file.write(self.delimiter.join(labels))
+        else:
+            print "CsvPrinter: Please provide column labels"
+            exit()
+
+    def writerow(self, data):
+        if len(data) == self.columns:
+            data.append('\n')
+            self.file.write(self.delimiter.join([str(x) for x in data]))
+        else:
+            print "CsvPrinter: Data length should match number of labels"
+            exit()
+
+    def close(self):
+        self.file.close()
 
 class Data:
     def __init__(self, filename=None):
@@ -50,6 +58,20 @@ class Data:
             features.append(line.split(','))
         return features
 
+class Cluster:
+    def __init__(self, center, points=[]):
+        self.center = center
+        self.points = points
+    def update_center(self):
+        self.center = np.mean(self.points, axis=0)
+        del self.points[:]
+    def similarity(self, x):
+        #Euclidian Distance
+        return np.sum(np.square(self.center - x))
+
+    def calculate_sse(self):
+        return np.sum(np.square(self.points - self.center))
+
 class Kmeans:
     def __init__(self, data, k=2):
         self._data = data
@@ -68,6 +90,17 @@ class Kmeans:
                 print "Converged!"
             else:
                 self._update_centers()
+
+    def calculate_sse(self):
+        sse = 0
+        for cluster in self._clusters:
+            sse += cluster.calculate_sse()
+        return sse
+
+    def reset(self):
+        del self._clusters[:]
+        del self._previous_cluster_sizes[:]
+        self._initialize_clusters()
 
     def _assign_point(self, x):
         min_error = sys.maxint
@@ -98,7 +131,21 @@ class Kmeans:
 
 def main():
     data = Data("data/data.txt")
-    k_means = Kmeans(data)
-    k_means.cluster()
+    #k_means_clustering(data)
+
+def k_means_clustering(data):
+    labels = 'k T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 AVG'.split()
+    csv = CsvPrinter("reports/k_means.csv", labels)
+    for k in range(2, 11):
+        k_means = Kmeans(data, k=k)
+        sses = []
+        for i in range(10):
+            k_means.reset()
+            k_means.cluster()
+            sses.append(k_means.calculate_sse())
+        avg = float(sum(sses))/len(sses)
+        sses.insert(0, k)
+        sses.append(avg)
+        csv.writerow(sses)
 
 if __name__ == '__main__':main()
