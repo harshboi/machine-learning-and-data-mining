@@ -147,5 +147,6 @@ def k_means_clustering(data):
         sses.insert(0, k)
         sses.append(avg)
         csv.writerow(sses)
+    csv.close()
 
 if __name__ == '__main__':main()
