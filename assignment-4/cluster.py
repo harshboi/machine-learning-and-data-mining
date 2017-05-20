@@ -195,7 +195,7 @@ def update_neighbors_single_link(clusters, removed_id = None):
                 
                     
                         
-def merge_clusters(clusters):
+def merge_clusters(clusters, print_flag = False):
    # print "Merge"
     smallest_distance = None
     cluster_index = None
@@ -203,9 +203,12 @@ def merge_clusters(clusters):
         if smallest_distance == None or smallest_distance < c.distance_to_neighbor:
             smallest_distance = c.distance_to_neighbor
             cluster_index = i
-    
+            
     cluster_to_remove = clusters[cluster_index].neighbor_id
-  
+    if print_flag: 
+        print "-------------"
+        print "clusters " + str(clusters[cluster_index].id) + " and " + str(clusters[cluster_index].neighbor_id) + " are merged"
+        print "Distance: " + str(smallest_distance)
     for i, c in enumerate(clusters):
         if c.id == cluster_to_remove:
             cluster_index_to_remove = i
@@ -261,8 +264,9 @@ def hac(data):
         print "# of clusters"
         print len(clusters)      
         clusters = merge_clusters(clusters)
-    for c in clusters:
-        print c.points
+    while len(clusters) > 1:
+        clusters = merge_clusters(clusters, print_flag = True)
+   
   
     
 if __name__ == '__main__':main()
