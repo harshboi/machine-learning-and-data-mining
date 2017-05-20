@@ -129,9 +129,111 @@ class Kmeans:
         print cluster_sizes
         return cluster_sizes == self._previous_cluster_sizes
 
+class hac_cluster:
+    
+    def __init__(self, data, id):
+        self.id = id   
+        self.points = []
+        self.points.append(data)
+        self.neighbor_id = None
+        self.distance_to_neighbor = None
+        
+    
+        
+        
+def calculate_distance(p1, p2):
+    sum = 0
+    for i in range(len(p1)):
+        sum += (p2[i] - p1[i])**2
+    return sum**0.5
+        
+def update_neighbors_single_link(clusters, removed_id = None):
+    #print "Update Neighbors"
+    #go through every pair of clusters
+    for i, c1 in enumerate(clusters):
+        if removed_id == None:
+            for j, c2 in enumerate(clusters[i+1:]):
+                #go through every point in those 2 clusters
+              
+                for p1 in c1.points:
+                    for p2 in c2.points:
+                     
+                        distance = calculate_distance(p1, p2)
+                    
+                        if c1.distance_to_neighbor == None or c1.distance_to_neighbor > distance:
+                            c1.distance_to_neighbor = distance
+                            c1.neighbor_id = c2.id
+                    
+                            
+                        if c2.distance_to_neighbor == None or c2.distance_to_neighbor > distance:
+                            c2.distance_to_neighbor = distance
+                            c2.neighbor_id = c1.id
+                            
+            
+        else:
+
+            if removed_id == c1.neighbor_id:
+                
+                c1.distance_to_neighbor = None
+                c1.neighbor_id = None
+                
+                for j, c2 in enumerate(clusters[i+1:]):
+                #go through every point in those 2 clusters
+              
+                    for p1 in c1.points:
+                        for p2 in c2.points:
+                         
+                            distance = calculate_distance(p1, p2)
+                        
+                            if c1.distance_to_neighbor == None or c1.distance_to_neighbor > distance:
+                                c1.distance_to_neighbor = distance
+                                c1.neighbor_id = c2.id
+                                
+                            if c2.distance_to_neighbor == None or c2.distance_to_neighbor > distance:
+                                c2.distance_to_neighbor = distance
+                                c2.neighbor_id = c1.id
+                
+                    
+                        
+def merge_clusters(clusters):
+   # print "Merge"
+    smallest_distance = None
+    cluster_index = None
+    for i, c in enumerate(clusters):
+        if smallest_distance == None or smallest_distance < c.distance_to_neighbor:
+            smallest_distance = c.distance_to_neighbor
+            cluster_index = i
+    
+    cluster_to_remove = clusters[cluster_index].neighbor_id
+  
+    for i, c in enumerate(clusters):
+        if c.id == cluster_to_remove:
+            cluster_index_to_remove = i
+          
+    new_points = []
+    
+
+
+    for x in clusters[cluster_index_to_remove].points:
+        new_points.append(x)
+    for x in clusters[cluster_index].points:
+        new_points.append(x)    
+       
+    clusters[cluster_index].points = new_points
+    removed_c_id = clusters[cluster_index_to_remove].id
+    
+    #Points have been unioned...we need to remove all references to the old cluster
+    
+    clusters.pop(cluster_index_to_remove)
+  
+    update_neighbors_single_link(clusters, removed_id=removed_c_id)
+
+    return clusters
+    
 def main():
-    data = Data("data/data.txt")
+    data = Data("data/data_reduced.txt")
     #k_means_clustering(data)
+    hac(data[:100])
 
 def k_means_clustering(data):
     labels = 'k T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 AVG'.split()
@@ -149,4 +251,18 @@ def k_means_clustering(data):
         csv.writerow(sses)
     csv.close()
 
+def hac(data):
+    clusters = []
+    for i, x in enumerate(data):
+        clusters.append(hac_cluster(x, i))
+    #print len(clusters[0].points) 
+    update_neighbors_single_link(clusters)
+    while len(clusters) > 10:
+        print "# of clusters"
+        print len(clusters)      
+        clusters = merge_clusters(clusters)
+    for c in clusters:
+        print c.points
+  
+    
 if __name__ == '__main__':main()
