@@ -153,6 +153,7 @@ def update_neighbors_single_link(clusters, removed_id = None):
     for i, c1 in enumerate(clusters):
         #print i
         if removed_id == None:
+            print i
             for j, c2 in enumerate(clusters[i+1:]):
                 #go through every point in those 2 clusters
               
@@ -178,21 +179,21 @@ def update_neighbors_single_link(clusters, removed_id = None):
                 c1.distance_to_neighbor = None
                 c1.neighbor_id = None
                 
-                for j, c2 in enumerate(clusters[i+1:]):
+                for j, c2 in enumerate(clusters):
                 #go through every point in those 2 clusters
-              
-                    for p1 in c1.points:
-                        for p2 in c2.points:
-                         
-                            distance = calculate_distance(p1, p2)
-                        
-                            if c1.distance_to_neighbor == None or c1.distance_to_neighbor > distance:
-                                c1.distance_to_neighbor = distance
-                                c1.neighbor_id = c2.id
-                                
-                            if c2.distance_to_neighbor == None or c2.distance_to_neighbor > distance:
-                                c2.distance_to_neighbor = distance
-                                c2.neighbor_id = c1.id
+                    if not i == j:
+                        for p1 in c1.points:
+                            for p2 in c2.points:
+                             
+                                distance = calculate_distance(p1, p2)
+                            
+                                if c1.distance_to_neighbor == None or c1.distance_to_neighbor > distance:
+                                    c1.distance_to_neighbor = distance
+                                    c1.neighbor_id = c2.id
+                                    
+                                if c2.distance_to_neighbor == None or c2.distance_to_neighbor > distance:
+                                    c2.distance_to_neighbor = distance
+                                    c2.neighbor_id = c1.id
                 
 def update_neighbors_complete_link(clusters, removed_id = None):
     #print "Update Neighbors"
@@ -227,30 +228,31 @@ def update_neighbors_complete_link(clusters, removed_id = None):
                 c1.distance_to_neighbor = None
                 c1.neighbor_id = None
                 
-                for j, c2 in enumerate(clusters[i+1:]):
+                for j, c2 in enumerate(clusters):
                 #go through every point in those 2 clusters
-              
-                    for p1 in c1.points:
-                        for p2 in c2.points:
-                         
-                            cur_distance = calculate_distance(p1, p2)
-                            if cur_distance > distance:
-                                distance = cur_distance
-                        
-                    if c1.distance_to_neighbor == None or c1.distance_to_neighbor > distance:
-                        c1.distance_to_neighbor = distance
-                        c1.neighbor_id = c2.id
-                        
-                    if c2.distance_to_neighbor == None or c2.distance_to_neighbor > distance:
-                        c2.distance_to_neighbor = distance
-                        c2.neighbor_id = c1.id                    
+                    if not i == j:
+                        distance = 0
+                        for p1 in c1.points:
+                            for p2 in c2.points:
+                             
+                                cur_distance = calculate_distance(p1, p2)
+                                if cur_distance > distance:
+                                    distance = cur_distance
+                            
+                        if c1.distance_to_neighbor == None or c1.distance_to_neighbor > distance:
+                            c1.distance_to_neighbor = distance
+                            c1.neighbor_id = c2.id
+                            
+                        if c2.distance_to_neighbor == None or c2.distance_to_neighbor > distance:
+                            c2.distance_to_neighbor = distance
+                            c2.neighbor_id = c1.id                    
                         
 def merge_clusters(clusters, link_type, print_flag = False):
    # print "Merge"
     smallest_distance = None
     cluster_index = None
     for i, c in enumerate(clusters):
-        if smallest_distance == None or smallest_distance < c.distance_to_neighbor:
+        if smallest_distance == None or smallest_distance > c.distance_to_neighbor:
             smallest_distance = c.distance_to_neighbor
             cluster_index = i
             
@@ -280,14 +282,14 @@ def merge_clusters(clusters, link_type, print_flag = False):
     clusters.pop(cluster_index_to_remove)
     if link_type == "single":
         update_neighbors_single_link(clusters, removed_id=removed_c_id)
-    elif link_type == "complete"
+    elif link_type == "complete":
         update_neighbors_complete_link(clusters, removed_id=removed_c_id)
     return clusters
     
 def main():
     data = Data("data/data_reduced.txt")
     #k_means_clustering(data)
-    hac_completelink(data[:100])
+    hac_singlelink(data)
 
 def k_means_clustering(data):
     labels = 'k T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 AVG'.split()
