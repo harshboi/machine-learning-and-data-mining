@@ -82,15 +82,27 @@ class Kmeans:
 
     def cluster(self):
         converged = False
+        #For part 1
+        if self._k == 2:
+            labels = 'k=2'.split()
+            csv = CsvPrinter("reports/sse_during_iterations.csv", labels)
+            
         while not converged:
             for x in self._data:
                 self._assign_point(x)
+            if self._k == 2:
+                sse = []
+                sse.append(self.calculate_sse())
+                csv.writerow(sse)
+                   
             if self._check_convergence():
                 converged = True
                 print "Converged!"
             else:
                 self._update_centers()
-
+          
+        if self._k == 2:        
+            csv.close()
     def calculate_sse(self):
         sse = 0
         for cluster in self._clusters:
@@ -153,7 +165,7 @@ def update_neighbors_single_link(clusters, removed_id = None):
     for i, c1 in enumerate(clusters):
     
         if removed_id == None:
-            print i
+    
             for j, c2 in enumerate(clusters[i+1:]):
                 #go through every point in those 2 clusters
               
@@ -293,19 +305,22 @@ def merge_clusters(clusters, link_type, print_flag = False):
     return clusters
     
 def main():
-    data = Data("data/data_reduced.txt")
+    data = Data("data/data.txt")
+    data_r = Data("data/data_reduced.txt")
     #Enable the one you want...Each one can take a while!
     k_means_clustering(data)
-    #hac_singlelink(data)
-    #hac_completelink(data)
+    #hac_singlelink(data_r)
+    #hac_completelink(data_r)
 
 def k_means_clustering(data):
     labels = 'k T1 T2 T3 T4 T5 T6 T7 T8 T9 T10 AVG'.split()
     csv = CsvPrinter("reports/k_means.csv", labels)
+
     for k in range(2, 11):
         k_means = Kmeans(data, k=k)
         sses = []
-        for i in range(10):
+        for i in range(2):
+            print i
             k_means.reset()
             k_means.cluster()
             sses.append(k_means.calculate_sse())
