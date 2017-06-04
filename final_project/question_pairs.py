@@ -25,23 +25,23 @@ def main():
     
     word_dict = dict()
     print "Counting"
+    total_words = 0
+    
     for line in train_file:
         qs = QuestionPair(line)
         words_in_question = qs.q1.split(' ') + qs.q2.split(' ')
         for current_word in words_in_question: 
             if not current_word == '':
+                total_words += 1
                 if current_word in word_dict:                 
                     word_dict[current_word] += 1                       
                 else:
                     word_dict[current_word] = 1
-                    
-    print word_dict
     
-    total_words = 0
-    for w in words:
-        if not w.string == '':
-            word_file.write(w.string + "," + str(w.count) + '\n')
-            total_words += w.count
+    print "Writing File"
+    for w in word_dict:
+            word_file.write(w + "," + str(word_dict[w]) + '\n')
+            
     scores = []
     for qs in data:
         q1_words = qs.q1.split(' ') 
