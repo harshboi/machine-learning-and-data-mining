@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 ################################################
 # CS434 Machine Learning and Data Mining       #
-# Assignment 4: K-means and HAC                #
+# Niave Bayes Attempt                          #
 # Nathan Brahmstadt and Jordan Crane           #
 ################################################
 
@@ -14,55 +14,29 @@ from operator import attrgetter
 
 class QuestionPair:
     def __init__(self, string):
-        string = string.split('","')
-        #for i, l in enumerate(string):
-            #string[i] = l[1:-1]
-            #print l[1:-1]
-        self.id = string[0]
-        self.qid1 = string[1]
-        self.qid2 = string[2]
-        self.q1 = regularize(string[3])
-        self.q2 = regularize(string[4])
-        self.is_duplicate = string[5]
-
-class Word:
-    def __init__(self, string):
-        self.string = string
-        self.count = 1
-        
-def regularize(string):
-    string = string.lower()
-    slist = list(string)
-    punctuation = ['?', '/', '-', '.', '[', ']', '(', ')', '"', ',']
-    for i,c in enumerate(slist):
-        if c in punctuation:
-            slist[i] = ' '
-    #print "".join(slist)
-    return "".join(slist) 
+        string = string.split(',')
+        self.q1 = string[0]
+        self.q2 = string[1]
+        self.is_duplicate = string[2]
     
 def main():
-    train_file = open('data/train_reduced.csv')
-    word_file = open('words.txt', 'w')
-    data = []
-    print "Parsing"
-    for i,line in enumerate(train_file):
-        if not i == 0:
-            data.append(QuestionPair(line))
-        
-    words = []
+    train_file = open('data/sentences.csv')
+    word_file = open('words.txt', 'w')  
+    
+    word_dict = dict()
     print "Counting"
-    for qs in data:
+    for line in train_file:
+        qs = QuestionPair(line)
         words_in_question = qs.q1.split(' ') + qs.q2.split(' ')
-        for current_word in words_in_question:
-            found_match_flag = False
+        for current_word in words_in_question: 
             if not current_word == '':
-                for word in words:
-                    if word.string == current_word:
-                        word.count += 1
-                        found_match_flag = True
-                if found_match_flag == False:
-                    words.append(Word(current_word))
-    print "writing..."  
+                if current_word in word_dict:                 
+                    word_dict[current_word] += 1                       
+                else:
+                    word_dict[current_word] = 1
+                    
+    print word_dict
+    
     total_words = 0
     for w in words:
         if not w.string == '':
