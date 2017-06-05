@@ -10,6 +10,7 @@ import numpy as np
 import random
 from collections import namedtuple
 from operator import attrgetter
+import statistics as stats
 
 
 class QuestionPair:
@@ -27,7 +28,7 @@ class QuestionPair:
 def main():
     train_file = open('data/sentences.csv')
     word_file = open('words.txt', 'w')  
-    
+    wrongs_file = open('wrongs.txt', 'w')
     word_dict = dict()
     print "Counting"
     total_words = 0
@@ -81,21 +82,26 @@ def main():
             
         #difference = (q1_score-q2_score)**2
     
-        scores.append([score,qs.is_duplicate])
+        scores.append([score,qs.is_duplicate,qs.q1,qs.q2])
       
         
     pos_average = 0
     pos_count = 0
     neg_average = 0
     neg_count = 0
-   
+    
+    positives = []
+    negatives = []
+    
     for score in scores:     
         if score[1] == 1:
             pos_count += 1
             pos_average += score[0]
+            positives.append(score[0])
         else:
             neg_count += 1
             neg_average += score[0]
+            negatives.append(score[0])
            
     pos_average = pos_average / pos_count   
     neg_average = neg_average / neg_count
@@ -103,21 +109,36 @@ def main():
     print pos_average
     print "Difference score for negatives:"
     print neg_average
-    
+    print "STD"
+    print stats.stdev(positives)
+    pos_point = stats.median(positives)
+
+    print stats.stdev(negatives)
+    neg_point = stats.median(negatives)
     decision_point = neg_average - pos_average
     
     right = 0
     wrong = 0
+    abstains = 0
+    
     
     for score in scores:
-        if score[0] > decision_point:
+        if score[0] > neg_point:
             predict = 0
-        else:
+        elif score[0] < pos_point:
             predict = 1
-        if predict == score[1]:
-            right += 1
         else:
-            wrong += 1
-            
+            predict = None
+            abstains += 1
+        if not predict == None:
+            if predict == score[1]:
+                right += 1
+            else:
+                wrong += 1
+                wrongs_file.write(str(score) + '\n')
+                
+    print "Accuracy of what I said:"        
     print float(right)/(right+wrong)
+    print "Percent abstained:"
+    print float(abstains)/(abstains+right+wrong)
 main()   
