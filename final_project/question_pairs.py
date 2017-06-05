@@ -147,7 +147,7 @@ def main():
         features.append((g[0],g[1]))
         classes.append(g[2])
     
-    model = SVC(max_iter = 10000, kernel='linear', C = 1.0)
+    model = SVC(max_iter = 1000000, kernel='linear', C = 1.0)
     model.fit(features, classes)
     
             
