@@ -10,20 +10,17 @@ class QuestionPair:
     def __init__(self, string):
         string = string.split('","')
         if len(string) != 6:
-            print len(string)
-            print string
+          
             #The stupid questions have a lot of edge cases for parsing. This solves the ones with "," in them
             for i,s in enumerate(string):
                 while 1:
                     if s[-1] == '\"' and string[i+1][0] == '\"':
                         string[i] = string[i] + string[i+1]
-                        print "Merged:"
-                        print string[i]
+                     
                         del string[i+1]
                     else:
                         break
-            print len(string)
-            print string
+         
         self.id = string[0].replace("\"","")
         self.qid1 = string[1]
         self.qid2 = string[2]
@@ -54,7 +51,7 @@ def regularize_string(string):
     
 def main():
     train_file = open('data/train.csv')
-    output_file = open('data/sentences.csv','w')
+    output_file = open('outputs/sentences.csv','w')
     #Skip first line
     train_file.readline()
     
