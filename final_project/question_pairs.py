@@ -17,7 +17,12 @@ class QuestionPair:
         string = string.split(',')
         self.q1 = string[0]
         self.q2 = string[1]
-        self.is_duplicate = string[2]
+        try:
+            self.is_duplicate = int(string[2][0])
+        except:
+          
+            print string
+            print string[2]
     
 def main():
     train_file = open('data/sentences.csv')
@@ -43,7 +48,12 @@ def main():
             word_file.write(w + "," + str(word_dict[w]) + '\n')
             
     scores = []
-    for qs in data:
+    print "Learning..."
+    #Go back to start
+    train_file.seek(0)
+    for line in train_file:
+     
+        qs = QuestionPair(line)
         q1_words = qs.q1.split(' ') 
         q2_words = qs.q2.split(' ')
        
@@ -55,42 +65,39 @@ def main():
         all_words = q1_words + q2_words
        
         for w in all_words:
-            if not w == ' ':
+            if not (w == '\n' or w == ''):
                 if w in q1_words and w in q2_words:
                     common_words.append(w)
                 else:
                     different_words.append(w)           
         
-        for current_word in common_words:
-            for w in words:
-                if w.string == current_word:
-                    count = w.count
-            score -= total_words / count
+        for current_word in common_words:            
+             
+            score -= float(total_words) / word_dict[current_word]
+          
+        for current_word in different_words:
+     
+            score += float(total_words) / word_dict[current_word]
             
-        for current_word in q2_words:
-            for w in words:
-                if w.string == current_word:
-                    count = w.count
-            score += total_words / count
         #difference = (q1_score-q2_score)**2
+    
         scores.append([score,qs.is_duplicate])
+      
+        
     pos_average = 0
     pos_count = 0
     neg_average = 0
     neg_count = 0
-    for score in scores:
-        try:
-            score[1] = int(score[1][0])
-        except:
-            print score
+   
+    for score in scores:     
         if score[1] == 1:
             pos_count += 1
             pos_average += score[0]
         else:
             neg_count += 1
             neg_average += score[0]
-            
-    pos_average = pos_average / pos_count
+           
+    pos_average = pos_average / pos_count   
     neg_average = neg_average / neg_count
     print "Difference score for positives:"
     print pos_average
@@ -101,6 +108,7 @@ def main():
     
     right = 0
     wrong = 0
+    
     for score in scores:
         if score[0] > decision_point:
             predict = 0
