@@ -51,7 +51,7 @@ def regularize_string(string):
     
 def main():
     train_file = open('data/train.csv')
-    output_file = open('outputs/sentences.csv','w')
+    output_file = open('outputs/sentences.csv','w+')
     #Skip first line
     train_file.readline()
     
