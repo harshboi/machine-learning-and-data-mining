@@ -206,23 +206,27 @@ def main():
     model = LinearSVC()
     model.fit(features, classes)
     print("Accuracy: " + str(model.score(features, classes)))
+    wrong_file = open('outputs/wrong.csv','w+')
+    for i,f in enumerate(features):
+        if model.predict(f) != classes[i]:
+            wrong_file.write(qs[i].q1 + ',' + qs[i].q2 + ',' + str(qs[i].label) + ',' + str(f[0]) + ',' + str(f[1]) + ',' + str(f[2]) + ',\n')
     
     
     #Plotting code from https://pythonprogramming.net/linear-svc-example-scikit-learn-svm-python/
-    print('Plotting...')
+    #print('Plotting...')
     
-    w = model.coef_[0]
-    a = -w[0] / w[1]
-    xx = np.linspace(-0.5,0.5, num = 50)
-    yy = a * xx - model.intercept_[0] / w[1]
-    h0 = plt.plot(xx, yy, 'k-', label="Decision Line")
+    #w = model.coef_[0]
+    #a = -w[0] / w[1]
+    #xx = np.linspace(-0.5,0.5, num = 50)
+    #yy = a * xx - model.intercept_[0] / w[1]
+    #h0 = plt.plot(xx, yy, 'k-', label="Decision Line")
     
-    np_features = np.array(features)
-    plt.scatter(np_features[:,0],np_features[:,1], c = classes)  
-    plt.grid(True)
-    plt.legend()
-    plt.axis([-0.5, 0.5, -0.5, 0.5])
-    plt.show()    
+   #np_features = np.array(features)
+    #plt.scatter(np_features[:,0],np_features[:,1], c = classes)  
+    #plt.grid(True)
+    #plt.legend()
+    #plt.axis([-0.5, 0.5, -0.5, 0.5])
+    #plt.show()    
     
         
     
