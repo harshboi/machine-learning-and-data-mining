@@ -212,7 +212,7 @@ def main():
     plt.scatter(np_features[:,0],np_features[:,1], c = classes)  
     plt.grid(True)
     plt.legend()
-    plt.axis([-0.6, 0.6, -0.6, 0.6])
+    plt.axis([-0.5, 0.5, -0.5, 0.5])
     plt.show()    
     
         

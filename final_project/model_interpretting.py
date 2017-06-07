@@ -7,8 +7,10 @@
 
 import numpy as np
 from gensim.models import word2vec
+from gensim.models.keyedvectors import KeyedVectors
 import logging
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s, level=logging.INFO)
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+
 
 
 
@@ -17,41 +19,35 @@ class QuestionPair:
         string = string.split(',')
         self.q1 = string[0]
         self.q2 = string[1]
+        self.is_duplicate = int(string[2])
+  
+def remove_from_list(array, value):
+    return [x for x in array if x != value]
     
-        self.is_duplicate = int(string[2][0])
-  
-  
 def main():
-    train_file = open('outputs/sentences.csv') 
-    
-    model = word2vec.load('outputs/first_model')
-    
-    print "Starting"
-    #Go back to start
-    positives = []
-    negatives = []
+    train_file = open('outputs/parsed_questions.csv') 
+    output_file = open('outputs/similarities.csv','w+')
+    #Link to google news trained binary: https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit
+    print("Loading pre-trained model...")
+    model = KeyedVectors.load_word2vec_format('models/GoogleNews-vectors-negative300.bin', binary=True)
+    print("Processing Training Data...")
     for line in train_file:
-     
+  
         qs = QuestionPair(line)
         q1_words = qs.q1.split(' ') 
         q2_words = qs.q2.split(' ')
-  
-        score1 = model.score(q1_words)
-        score2 = model.score(q2_words)
-        if qs.is_duplicate:
-            positives.append(abs(score1-score2))
-        else:
-            negatives.append(abs(score1-score2))
-    print "Results:"
-    print np.mean(positives)
-    print np.mean(negatives)
         
-    #print "Training"
-   # model = word2vec.Word2Vec(sentences, workers=4, size = 300, min_count = 2, sample = 0.001)
-   # model.init_sims(replace=True)
-   # model.save('outputs/first_model')
-   
-   
-    
+        for w in q1_words:
+            if w not in model.vocab:
+                remove_from_list(q1_words,w)
+                
+        for w in q2_words:
+            if w not in model.vocab:
+                remove_from_list(q2_words,w)
+                
+        
+        score = model.n_similarity(q1_words, q2_words)
+        output_file.write(str(score)+',\n')
+       
     
 main()   
