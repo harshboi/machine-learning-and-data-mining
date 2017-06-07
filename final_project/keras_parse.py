@@ -25,6 +25,7 @@ class QuestionPair:
         self.label = label
 
 TRAIN_DATA_FILE = 'data/train.csv'
+OUTPUT_DATA_FILE = 'outputs/parsed_questions.csv'
 
 ########################################
 ## process texts in datasets
@@ -90,13 +91,17 @@ def text_to_wordlist(text, remove_stopwords=False, stem_words=False):
 texts_1 = []
 texts_2 = []
 label_list = []
+
+output_file = open(OUTPUT_DATA_FILE,'w+')
+
 with codecs.open(TRAIN_DATA_FILE, encoding='utf-8') as f:
     reader = csv.reader(f, delimiter=',')
     header = next(reader)
     for values in reader:
-        text_1 = text_to_wordlist(values[3])
-        text_2 = text_to_wordlist(values[4])
-        label_list = int(values[5])
+        texts_1.append(text_to_wordlist(values[3]))
+        texts_2.append(text_to_wordlist(values[4]))
+        label_list.append(int(values[5]))
+        output_file.write(texts_1[-1] + "," + texts_2[-1] + "," + str(label_list[-1]) + ",\n")
 
 questions_1 = np.array(texts_1)
 questions_2 = np.array(texts_2)
