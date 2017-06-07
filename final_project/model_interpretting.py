@@ -38,15 +38,17 @@ def main():
         q2_words = qs.q2.split(' ')
         
         for w in q1_words:
-            if w not in model.vocab:
-                remove_from_list(q1_words,w)
+            if not w in model.vocab:
+                q1_words = remove_from_list(q1_words,w)
                 
         for w in q2_words:
-            if w not in model.vocab:
-                remove_from_list(q2_words,w)
+            if not w in model.vocab:
+                q2_words = remove_from_list(q2_words,w)
                 
-        
-        score = model.n_similarity(q1_words, q2_words)
+        try:
+            score = model.n_similarity(q1_words, q2_words)
+        except:
+            score = 0
         output_file.write(str(score)+',\n')
        
     
