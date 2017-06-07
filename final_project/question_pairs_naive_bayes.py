@@ -193,6 +193,15 @@ def main():
     print('Testing...')
     (features, classes) = create_features(qs, common_words_dict, different_words_dict, class_totals)
     
+    print('Adding in similarity scores for additional feature')
+    similarity_file = open('outputs/similarities.csv')
+    similarity_scores = []
+    for line in similarity_file:
+        similarity_scores.append(float(line.split(',')[0]))
+        
+    for i,x in enumerate(features):
+        features[i].append(similarity_scores[i])
+
     print('SVM...')
     model = LinearSVC()
     model.fit(features, classes)
