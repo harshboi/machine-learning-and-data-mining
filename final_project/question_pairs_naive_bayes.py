@@ -7,7 +7,7 @@
 
 import numpy as np
 import statistics as stats
-from sklearn.svm import SVC
+from sklearn.svm import LinearSVC
 import matplotlib.pyplot as plt
 from matplotlib import style
 style.use("ggplot")
@@ -193,13 +193,26 @@ def main():
     print('Testing...')
     (features, classes) = create_features(qs, common_words_dict, different_words_dict, class_totals)
     
+    print('SVM...')
+    model = LinearSVC()
+    model.fit(features, classes)
+    print("Accuracy: " + str(model.score(features, classes)))
     
+    
+    #Plotting code from https://pythonprogramming.net/linear-svc-example-scikit-learn-svm-python/
     print('Plotting...')
+    
+    w = model.coef_[0]
+    a = -w[0] / w[1]
+    xx = np.linspace(-0.5,0.5, num = 50)
+    yy = a * xx - model.intercept_[0] / w[1]
+    h0 = plt.plot(xx, yy, 'k-', label="Decision Line")
     
     np_features = np.array(features)
     plt.scatter(np_features[:,0],np_features[:,1], c = classes)  
+    plt.grid(True)
     plt.legend()
-    plt.axis([-0.5, 0.5, -0.5, 0.5])
+    plt.axis([-0.6, 0.6, -0.6, 0.6])
     plt.show()    
     
         
