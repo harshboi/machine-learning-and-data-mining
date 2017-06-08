@@ -25,7 +25,10 @@ from string import punctuation
 #from sklearn.model_selection import test train split
 
 TRAIN_DATA_FILE = 'data/train.csv'
-OUTPUT_DATA_FILE = 'outputs/parsed_questions.csv'
+OUTPUT_TRAIN_DATA_FILE = 'outputs/parsed_questions.csv'
+
+TEST_DATA_FILE = 'data/test.csv'
+OUTPUT_TEST_DATA_FILE = 'outputs/parsed_test_data.csv'
 
 ########################################
 ## process texts in datasets
@@ -110,7 +113,8 @@ texts_1 = []
 texts_2 = []
 label_list = []
 
-output_file = open(OUTPUT_DATA_FILE,'w+')
+output_train_file = codecs.open(OUTPUT_TRAIN_DATA_FILE,'w+','utf-8')
+output_test_file = codecs.open(OUTPUT_TEST_DATA_FILE,'w','utf-8')
 
 with codecs.open(TRAIN_DATA_FILE, encoding='utf-8') as f:
     reader = csv.reader(f, delimiter=',')
@@ -121,8 +125,18 @@ with codecs.open(TRAIN_DATA_FILE, encoding='utf-8') as f:
         texts_2.append(text_to_wordlist(values[4], remove_stopwords=True,
             remove_punctuation=True))
         label_list.append(int(values[5]))
-        output_file.write(texts_1[-1] + "," + texts_2[-1] + "," + str(label_list[-1]) + ",\n")
+        output_train_file.write(texts_1[-1] + "," + texts_2[-1] + "," + str(label_list[-1]) + ",\n")
+        
+with codecs.open(TEST_DATA_FILE, encoding='utf-8') as f:
+    reader = csv.reader(f, delimiter=',')
+    header = next(reader)
+    for values in reader:
+        texts_1.append(text_to_wordlist(values[1], remove_stopwords=True,
+            remove_punctuation=True))
+        texts_2.append(text_to_wordlist(values[2], remove_stopwords=True,
+            remove_punctuation=True))
 
+        output_test_file.write(texts_1[-1] + "," + texts_2[-1] + ",\n")
 #questions_1 = np.array(texts_1)
 #questions_2 = np.array(texts_2)
 #labels = np.array(label_list)
