@@ -12,6 +12,7 @@ from sklearn.svm import LinearSVC
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from matplotlib import style
+import codecs
 style.use("ggplot")
 
 class QuestionPair:
@@ -19,7 +20,10 @@ class QuestionPair:
         string = string.split(',')
         self.q1 = string[0]
         self.q2 = string[1]
-        self.label = int(string[2])
+        try:
+            self.label = int(string[2])
+        except:
+            pass
 
 def load_data_from_file(file):
     qs = []
@@ -134,8 +138,10 @@ def naive_bayes(words, count_dict, class_totals):
     label_1_prob = float(class_totals[1]) / (class_totals[0] + class_totals[1])
 
     for word in words:
-        label_0_prob *= count_dict[word][0] / (count_dict[word][0] + count_dict[word][1])
-        label_1_prob *= count_dict[word][1] / (count_dict[word][0] + count_dict[word][1])
+        if word not in count_dict:
+            count_dict[word] = [0,0]
+        label_0_prob *= (count_dict[word][0]+1) / (count_dict[word][0] + count_dict[word][1] + 1)
+        label_1_prob *= (count_dict[word][1]+1) / (count_dict[word][0] + count_dict[word][1] + 1)
 
     alpha = 1.0 / (label_0_prob + label_1_prob)
     if label_0_prob >= label_1_prob:
@@ -171,11 +177,37 @@ def create_features(qs, common_words_dict, different_words_dict, class_totals):
         features.append([p0, p1])
 
     return features, classes
+    
+def test(qs, common_words_dict, different_words_dict, class_totals):
+
+    features = []
+
+
+    for q in qs:
+
+        p0, label0 = common_words_test(q.q1, q.q2, common_words_dict, class_totals)
+
+        p1, label1 = different_words_test(q.q1, q.q2, different_words_dict, class_totals)
+
+        p0 -= 0.5
+        p1 -= 0.5
+
+        if label0 == 0:
+            p0 *= -1
+        if label1 == 0:
+            p1 *= -1
+
+        features.append([p0, p1])
+
+    return features
 
 def main():
 
-    training_file = open('outputs/parsed_questions.csv')
-    features_file = open('outputs/features.csv', 'w')
+    training_file = codecs.open('outputs/parsed_questions.csv','r','utf-8')
+    testing_file = codecs.open('outputs/parsed_test_data.csv','r','utf-8')
+    test_results_file = codecs.open('outputs/test_data_results.csv','w+','utf-8')
+    test_results_file.write('test_id,is_duplicate\n')
+    #features_file = open('outputs/features.csv', 'w')
 
     print('Loading Data in from file...')
     qs = load_data_from_file(training_file)
@@ -191,17 +223,8 @@ def main():
     different_words_dict = bag_of_words_counter(different_words)
     class_totals = class_counter(qs)
 
-    print('Testing...')
+    print('Testing...(On training data)')
     (features, classes) = create_features(qs, common_words_dict, different_words_dict, class_totals)
-
-    print('Adding in similarity scores for additional feature')
-    similarity_file = open('outputs/similarities.csv')
-    similarity_scores = []
-    for line in similarity_file:
-        similarity_scores.append(float(line.split(',')[0]))
-
-    for i,x in enumerate(features):
-        features[i].append(similarity_scores[i])
 
     print('SVM...')
     #random.seed()
@@ -209,17 +232,28 @@ def main():
     #    features, classes, random_state=random.randint(0,100))
     model = LinearSVC()
     model.fit(features, classes)
+    decision = model.decision_function(features)
     print("Accuracy: " + str(model.score(features, classes)))
-
-    wrong_file = open('outputs/wrong.csv','w+')
+    
+    wrong_file = codecs.open('outputs/wrong.csv','w+','utf-8',)
     guesses = model.predict(features)
+    
     for i,guess in enumerate(guesses):
         if guess != classes[i]:
             wrong_file.write(qs[i].q1 + ',' + qs[i].q2 + ',' + str(qs[i].label)
                     + ',' + str(features[i][0]) + ',' + str(features[i][1]) + ','
-                    + str(features[i][2]) + '\n')
+                    + str(decision[i]) + '\n')
 
+    print('Test Data...')
+    qs = load_data_from_file(testing_file)
+    test_features = test(qs, common_words_dict, different_words_dict, class_totals)
 
+    test_guesses = model.decision_function(test_features)
+    for i,guess in enumerate(test_guesses):
+
+        test_results_file.write(str(i)+','+str(guess)+'\n')
+            
+    
     #Plotting code from https://pythonprogramming.net/linear-svc-example-scikit-learn-svm-python/
     #print('Plotting...')
 
