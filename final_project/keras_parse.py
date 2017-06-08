@@ -11,6 +11,7 @@ import codecs
 import numpy as np
 #import pandas as pd
 
+import nltk
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 from string import punctuation
@@ -22,12 +23,6 @@ from string import punctuation
 #from keras.models import Model
 #from sklearn.feature_extraction.text import CountVectorizer
 #from sklearn.model_selection import test train split
-
-class QuestionPair:
-    def __init__(self, q1, q2, label):
-        self.q1 = q1
-        self.q2 = q2
-        self.label = label
 
 TRAIN_DATA_FILE = 'data/train.csv'
 OUTPUT_DATA_FILE = 'outputs/parsed_questions.csv'
@@ -47,12 +42,16 @@ def text_to_wordlist(text, remove_stopwords=False, remove_punctuation=False, ste
 
     # Optionally, remove stop words
     if remove_stopwords:
-        stops = set(stopwords.words("english"))
+        try:
+            stops = set(stopwords.words("english"))
+        except:
+            nltk.download('stopwords')
+            stops = set(stopwords.words("english"))
         text = [w for w in text if not w in stops]
 
     # Optionally, remove punctuation
     if remove_punctuation:
-        text = [w for w in text if not w in string.punctuation]
+        text = [w for w in text if not w in punctuation]
 
     text = " ".join(text)
 
