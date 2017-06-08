@@ -204,22 +204,20 @@ def main():
         features[i].append(similarity_scores[i])
 
     print('SVM...')
-    random.seed()
-    X_train, X_test, y_train, y_test = train_test_split(
-        features, classes, random_state=random.randint(0,100))
-    c_values = [0.01, 0.05, 0.25, 0.5, 0.75, 1, 5, 10]
-    for i, c in enumerate(c_values):
-        print("c = ", c)
-        model = LinearSVC(C=c)
-        model.fit(X_train, y_train)
-        print("Accuracy: " + str(model.score(X_test, y_test)))
-    #wrong_file = open('outputs/wrong.csv','w+')
-    #guesses = model.predict(features)
-    #for i,guess in enumerate(guesses):
-    #    if guess != classes[i]:
-    #        wrong_file.write(qs[i].q1 + ',' + qs[i].q2 + ',' + str(qs[i].label)
-    #                + ',' + str(features[i][0]) + ',' + str(features[i][1]) + ','
-    #                + str(features[i][2]) + ',\n')
+    #random.seed()
+    #X_train, X_test, y_train, y_test = train_test_split(
+    #    features, classes, random_state=random.randint(0,100))
+    model = LinearSVC()
+    model.fit(features, classes)
+    print("Accuracy: " + str(model.score(features, classes)))
+
+    wrong_file = open('outputs/wrong.csv','w+')
+    guesses = model.predict(features)
+    for i,guess in enumerate(guesses):
+        if guess != classes[i]:
+            wrong_file.write(qs[i].q1 + ',' + qs[i].q2 + ',' + str(qs[i].label)
+                    + ',' + str(features[i][0]) + ',' + str(features[i][1]) + ','
+                    + str(features[i][2]) + '\n')
 
 
     #Plotting code from https://pythonprogramming.net/linear-svc-example-scikit-learn-svm-python/
