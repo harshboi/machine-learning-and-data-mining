@@ -9,6 +9,7 @@ import random
 import numpy as np
 import statistics as stats
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import log_loss
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from matplotlib import style
@@ -234,7 +235,7 @@ def main():
     model.fit(features, classes)
     decision = model.predict_proba(features)
     print("Accuracy: " + str(model.score(features, classes)))
-    
+    print("Log Loss: " + str(log_loss(classes, decision)))
     wrong_file = codecs.open('outputs/wrong.csv','w+','utf-8',)
     guesses = model.predict(features)
     
