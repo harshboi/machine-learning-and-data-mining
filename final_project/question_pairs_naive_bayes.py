@@ -8,7 +8,7 @@
 import random
 import numpy as np
 import statistics as stats
-from sklearn.svm import LinearSVC
+from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from matplotlib import style
@@ -230,9 +230,9 @@ def main():
     #random.seed()
     #X_train, X_test, y_train, y_test = train_test_split(
     #    features, classes, random_state=random.randint(0,100))
-    model = LinearSVC()
+    model = LogisticRegression()
     model.fit(features, classes)
-    decision = model.decision_function(features)
+    decision = model.predict_proba(features)
     print("Accuracy: " + str(model.score(features, classes)))
     
     wrong_file = codecs.open('outputs/wrong.csv','w+','utf-8',)
@@ -242,16 +242,16 @@ def main():
         if guess != classes[i]:
             wrong_file.write(qs[i].q1 + ',' + qs[i].q2 + ',' + str(qs[i].label)
                     + ',' + str(features[i][0]) + ',' + str(features[i][1]) + ','
-                    + str(decision[i]) + '\n')
+                    + str(decision[i][1]) + '\n')
 
     print('Test Data...')
     qs = load_data_from_file(testing_file)
     test_features = test(qs, common_words_dict, different_words_dict, class_totals)
 
-    test_guesses = model.decision_function(test_features)
+    test_guesses = model.predict_proba(test_features)
     for i,guess in enumerate(test_guesses):
 
-        test_results_file.write(str(i)+','+str(guess)+'\n')
+        test_results_file.write(str(i)+','+str(guess[1])+'\n')
             
     
     #Plotting code from https://pythonprogramming.net/linear-svc-example-scikit-learn-svm-python/
