@@ -13,6 +13,7 @@ from sklearn.metrics import log_loss
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 from matplotlib import style
+from math import log
 import codecs
 style.use("ggplot")
 
@@ -178,6 +179,35 @@ def create_features(qs, common_words_dict, different_words_dict, class_totals):
         features.append([p0, p1])
 
     return features, classes
+
+def tfidf_compute(qs, common_words_dict, different_words_dict):
+
+    scores = []
+
+    for q in qs:
+        score = 0
+        common_words = get_common_words(q.q1, q.q2)
+        different_words = get_different_words(q.q1, q.q2)
+       
+            
+        for current_word in common_words:            
+            current_word_count = 0
+            if current_word in common_words_dict:
+                current_word_count += common_words_dict[current_word][0] + common_words_dict[current_word][1]
+            if current_word in different_words_dict:
+                current_word_count += different_words_dict[current_word][0] + different_words_dict[current_word][1]
+            score -= log(float(len(qs)) / (current_word_count+1))
+          
+        for current_word in different_words:
+            current_word_count = 0
+            if current_word in different_words_dict:
+                current_word_count += different_words_dict[current_word][0] + different_words_dict[current_word][1]
+            if current_word in common_words_dict:
+                current_word_count += common_words_dict[current_word][0] + common_words_dict[current_word][1]
+            score += log(float(len(qs)) / (current_word_count+1))
+        
+        scores.append(score)
+    return scores    
     
 def test(qs, common_words_dict, different_words_dict, class_totals):
 
@@ -223,7 +253,10 @@ def main():
     common_words_dict = bag_of_words_counter(common_words)
     different_words_dict = bag_of_words_counter(different_words)
     class_totals = class_counter(qs)
-
+    
+    print('tf-idf')
+    tfidf_features = tfidf_compute(qs, common_words_dict, different_words_dict)
+    
     print('Testing...(On training data)')
     (features, classes) = create_features(qs, common_words_dict, different_words_dict, class_totals)
     print('Adding in similarity scores for additional feature')
@@ -234,6 +267,8 @@ def main():
         
     for i,x in enumerate(features):
         features[i].append(similarity_scores[i])
+        features[i].append(tfidf_features[i])
+        
     print('SVM...')
     #random.seed()
     #X_train, X_test, y_train, y_test = train_test_split(
@@ -249,12 +284,14 @@ def main():
     for i,guess in enumerate(guesses):
         if guess != classes[i]:
             wrong_file.write(qs[i].q1 + ',' + qs[i].q2 + ',' + str(qs[i].label)
-                    + ',' + str(features[i][0]) + ',' + str(features[i][1]) + ','
+                    + ',' + str(features[i][0]) + ',' + str(features[i][1]) + ',' + str(features[i][3]) + ','
                     + str(decision[i][1]) + '\n')
 
     print('Test Data...')
     qs = load_data_from_file(testing_file)
     test_features = test(qs, common_words_dict, different_words_dict, class_totals)
+    print("test tfidf")
+    test_tfidf = tfidf_compute(qs, common_words_dict, different_words_dict)
     print('Adding in similarity scores for additional feature on test data')
     similarity_file = codecs.open('outputs/similarities_test.csv','r','utf-8')
     similarity_scores = []
@@ -263,6 +300,7 @@ def main():
         
     for i,x in enumerate(test_features):
         test_features[i].append(similarity_scores[i])
+        test_features[i].append(test_tfidf[i])
     test_guesses = model.predict_proba(test_features)
     for i,guess in enumerate(test_guesses):
 
