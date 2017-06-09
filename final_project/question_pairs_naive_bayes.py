@@ -226,7 +226,14 @@ def main():
 
     print('Testing...(On training data)')
     (features, classes) = create_features(qs, common_words_dict, different_words_dict, class_totals)
-
+    print('Adding in similarity scores for additional feature')
+    similarity_file = codecs.open('outputs/similarities.csv','r','utf-8')
+    similarity_scores = []
+    for line in similarity_file:
+        similarity_scores.append(float(line.split(',')[0]))
+        
+    for i,x in enumerate(features):
+        features[i].append(similarity_scores[i])
     print('SVM...')
     #random.seed()
     #X_train, X_test, y_train, y_test = train_test_split(
@@ -248,7 +255,14 @@ def main():
     print('Test Data...')
     qs = load_data_from_file(testing_file)
     test_features = test(qs, common_words_dict, different_words_dict, class_totals)
-
+    print('Adding in similarity scores for additional feature on test data')
+    similarity_file = codecs.open('outputs/similarities_test.csv','r','utf-8')
+    similarity_scores = []
+    for line in similarity_file:
+        similarity_scores.append(float(line.split(',')[0]))
+        
+    for i,x in enumerate(test_features):
+        test_features[i].append(similarity_scores[i])
     test_guesses = model.predict_proba(test_features)
     for i,guess in enumerate(test_guesses):
 
