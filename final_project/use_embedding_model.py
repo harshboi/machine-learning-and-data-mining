@@ -29,10 +29,10 @@ def remove_from_list(array, value):
     return [x for x in array if x != value]
     
 def main():
-    train_file = codecs.open('outputs/parsed_questions.csv','r','utf-8') 
-    output_file = codecs.open('outputs/similarities.csv','w+','utf-8')
+    train_file = codecs.open('outputs/parsed_train_data.csv','r','utf-8') 
+    output_file = codecs.open('outputs/train_data_embedded_similarity.csv','w+','utf-8')
     test_file = codecs.open('outputs/parsed_test_data.csv','r','utf-8')
-    output_test_file = codecs.open('outputs/similarities_test.csv','w','utf-8')
+    output_test_file = codecs.open('outputs/test_data_embedded_similarity.csv','w','utf-8')
     #Link to google news trained binary: https://drive.google.com/file/d/0B7XkCwpI5KDYNlNUTTlSS21pQmM/edit
     print("Loading pre-trained model...")
     model = KeyedVectors.load_word2vec_format('models/GoogleNews-vectors-negative300.bin', binary=True)

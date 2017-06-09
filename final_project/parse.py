@@ -15,7 +15,7 @@ from nltk.stem import SnowballStemmer
 from string import punctuation
 
 TRAIN_DATA_FILE = 'data/train.csv'
-OUTPUT_TRAIN_DATA_FILE = 'outputs/parsed_questions.csv'
+OUTPUT_TRAIN_DATA_FILE = 'outputs/parsed_train_data.csv'
 
 TEST_DATA_FILE = 'data/test.csv'
 OUTPUT_TEST_DATA_FILE = 'outputs/parsed_test_data.csv'

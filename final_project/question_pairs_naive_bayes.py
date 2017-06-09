@@ -155,7 +155,7 @@ def naive_bayes(words, count_dict, class_totals):
     return (p*alpha, label)
 
 
-def create_features(qs, common_words_dict, different_words_dict, class_totals):
+def double_bayes_train(qs, common_words_dict, different_words_dict, class_totals):
 
     features = []
     classes = []
@@ -209,7 +209,7 @@ def tfidf_compute(qs, common_words_dict, different_words_dict):
         scores.append(score)
     return scores    
     
-def test(qs, common_words_dict, different_words_dict, class_totals):
+def double_bayes_test(qs, common_words_dict, different_words_dict, class_totals):
 
     features = []
 
@@ -232,96 +232,113 @@ def test(qs, common_words_dict, different_words_dict, class_totals):
 
     return features
 
-def main():
-
-    training_file = codecs.open('outputs/parsed_questions.csv','r','utf-8')
-    testing_file = codecs.open('outputs/parsed_test_data.csv','r','utf-8')
-    test_results_file = codecs.open('outputs/test_data_results.csv','w+','utf-8')
-    test_results_file.write('test_id,is_duplicate\n')
-    #features_file = open('outputs/features.csv', 'w')
-
-    print('Loading Data in from file...')
-    qs = load_data_from_file(training_file)
-
-    print('Finding common words...')
+def create_word_counts(qs):    
+    
     common_words = create_common_word_data(qs)
 
-    print('Finding different words...')
+
     different_words = create_different_word_data(qs)
 
-    print('Counting Words...')
+
     common_words_dict = bag_of_words_counter(common_words)
     different_words_dict = bag_of_words_counter(different_words)
     class_totals = class_counter(qs)
+ 
+    return common_words_dict, different_words_dict, class_totals
+    
+    
+def training_features(training_file, train_data_similarity_file):
+
+    print('Loading in Training Data')
+    qs = load_data_from_file(training_file)
+    
+    print('Analyzing word counts for models...')
+    common_words_dict, different_words_dict, class_totals = create_word_counts(qs)
     
     print('tf-idf')
     tfidf_features = tfidf_compute(qs, common_words_dict, different_words_dict)
     
-    print('Testing...(On training data)')
-    (features, classes) = create_features(qs, common_words_dict, different_words_dict, class_totals)
-    print('Adding in similarity scores for additional feature')
-    similarity_file = codecs.open('outputs/similarities.csv','r','utf-8')
-    similarity_scores = []
-    for line in similarity_file:
-        similarity_scores.append(float(line.split(',')[0]))
+    print('Naive Bayes Training')
+    (bayes_features, classes) = double_bayes_train(qs, common_words_dict, different_words_dict, class_totals)
+    
+    print('Adding embedded similarities as a feature')
+    similarity_features = []
+    for line in train_data_similarity_file:
+        similarity_features.append(float(line.split(',')[0]))
         
-    for i,x in enumerate(features):
-        features[i].append(similarity_scores[i])
-        features[i].append(tfidf_features[i])
+    for i,x in enumerate(bayes_features):
+        bayes_features[i].append(similarity_features[i])
+        bayes_features[i].append(tfidf_features[i])
         
-    print('SVM...')
-    #random.seed()
-    #X_train, X_test, y_train, y_test = train_test_split(
-    #    features, classes, random_state=random.randint(0,100))
+    return qs, bayes_features, common_words_dict, different_words_dict, class_totals, classes
+
+def training_logistic_regression(features, classes):
     model = LogisticRegression()
     model.fit(features, classes)
-    decision = model.predict_proba(features)
+    training_results = model.predict_proba(features)
     print("Accuracy: " + str(model.score(features, classes)))
-    print("Log Loss: " + str(log_loss(classes, decision)))
-    wrong_file = codecs.open('outputs/wrong.csv','w+','utf-8',)
-    guesses = model.predict(features)
+    print("Log Loss: " + str(log_loss(classes, training_results)))
+    return model, training_results
     
+def generate_wrong_file(wrong_file, model, features, qs, training_results, classes):
+    guesses = model.predict(features)
+    wrong_file.write('q1, q2, label, common_bayes, different_bayes, tfidf, logistic model result\n')
     for i,guess in enumerate(guesses):
         if guess != classes[i]:
             wrong_file.write(qs[i].q1 + ',' + qs[i].q2 + ',' + str(qs[i].label)
                     + ',' + str(features[i][0]) + ',' + str(features[i][1]) + ',' + str(features[i][3]) + ','
-                    + str(decision[i][1]) + '\n')
+                    + str(training_results[i][1]) + '\n')
+
+def generate_test_results_file(testing_file, common_words_dict, different_words_dict, class_totals, model, test_data_similarity_file, test_results_file):
+
+    qs = load_data_from_file(testing_file)
+    
+    bayes_features = double_bayes_test(qs, common_words_dict, different_words_dict, class_totals)
+    
+    print("test tfidf")
+    tfidf_features = tfidf_compute(qs, common_words_dict, different_words_dict)
+    
+    print('Adding in similarity scores for additional feature on test data')
+    similarity_features = []
+    for line in test_data_similarity_file:
+        similarity_features.append(float(line.split(',')[0]))
+        
+    for i,x in enumerate(bayes_features):
+        bayes_features[i].append(similarity_features[i])
+        bayes_features[i].append(tfidf_features[i])
+        
+    test_results = model.predict_proba(bayes_features)
+    
+    for i,guess in enumerate(test_results):
+        test_results_file.write(str(i)+','+str(guess[1])+'\n')    
+        
+def main():
+    #All our files
+    training_file = codecs.open('outputs/parsed_train_data.csv','r','utf-8')
+    testing_file = codecs.open('outputs/parsed_test_data.csv','r','utf-8')
+    
+    test_results_file = codecs.open('outputs/test_data_results.csv','w+','utf-8')
+    
+    train_data_similarity_file = codecs.open('outputs/train_data_embedded_similarity.csv','r','utf-8')
+    test_data_similarity_file = codecs.open('outputs/test_data_embedded_similarity.csv','r','utf-8')
+    
+    wrong_file = codecs.open('outputs/wrong.csv','w+','utf-8',)
+    
+    #Put expected header on test data
+    test_results_file.write('test_id,is_duplicate\n')
+  
+    print('Training...')
+    qs, features, common_words_dict, different_words_dict, class_totals, classes = training_features(training_file, train_data_similarity_file)
+    
+    print('Logistic Regression on all features...')
+    model, training_results = training_logistic_regression(features, classes)
+
+    print('Generating file with samples we get wrong...')
+    generate_wrong_file(wrong_file, model, features, qs, training_results, classes)
 
     print('Test Data...')
-    qs = load_data_from_file(testing_file)
-    test_features = test(qs, common_words_dict, different_words_dict, class_totals)
-    print("test tfidf")
-    test_tfidf = tfidf_compute(qs, common_words_dict, different_words_dict)
-    print('Adding in similarity scores for additional feature on test data')
-    similarity_file = codecs.open('outputs/similarities_test.csv','r','utf-8')
-    similarity_scores = []
-    for line in similarity_file:
-        similarity_scores.append(float(line.split(',')[0]))
-        
-    for i,x in enumerate(test_features):
-        test_features[i].append(similarity_scores[i])
-        test_features[i].append(test_tfidf[i])
-    test_guesses = model.predict_proba(test_features)
-    for i,guess in enumerate(test_guesses):
-
-        test_results_file.write(str(i)+','+str(guess[1])+'\n')
-            
+    generate_test_results_file(testing_file, common_words_dict, different_words_dict, class_totals, model, test_data_similarity_file, test_results_file)
     
-    #Plotting code from https://pythonprogramming.net/linear-svc-example-scikit-learn-svm-python/
-    #print('Plotting...')
-
-    #w = model.coef_[0]
-    #a = -w[0] / w[1]
-    #xx = np.linspace(-0.5,0.5, num = 50)
-    #yy = a * xx - model.intercept_[0] / w[1]
-    #h0 = plt.plot(xx, yy, 'k-', label="Decision Line")
-
-   #np_features = np.array(features)
-    #plt.scatter(np_features[:,0],np_features[:,1], c = classes)
-    #plt.grid(True)
-    #plt.legend()
-    #plt.axis([-0.5, 0.5, -0.5, 0.5])
-    #plt.show()
 
 
 
