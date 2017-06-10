@@ -21,8 +21,8 @@
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
 
-\title{Parallel Stacking of Naive Bayes Classifiers
-to Identifiy Duplicate Quora Questions}
+\title{Enemble Learning in Quora Question Intent Matching:
+Using Parallel Naive Bayes, Word Embedding, and TF-IDF to Quantify Intent Differences}
 
 % The \author macro works with any number of authors. There are two
 % commands used to separate the names and addresses of multiple
@@ -38,7 +38,7 @@ to Identifiy Duplicate Quora Questions}
   Nathan M.~Brahmstadt \\
   Department of Electrical and Computer Engineering\\
   Oregon State University\\
-  \texttt{brahmstadt@oregonstate.edu} \\
+  \texttt{brahmstn@oregonstate.edu} \\
   %% examples of more authors
   \And
   Jordan M.~Crane \\
@@ -73,11 +73,11 @@ to Identifiy Duplicate Quora Questions}
     to identify Quora questions with similar intent. We aimed to build a model
     that given a pair of questions, could reliably identify whether the
     questions were duplicates or not. We pursued several avenues to find the
-    best solution, but in the end we found the greatest success by stacking a
-    set of Naive Bayes classifiers and a word embedding classifier with a
-    support vector machine to concatenate the results of the classifiers.
-    Through this methodology, we achieved 82\% accuracy on our training data and
-    x\% accuracy on our testing data.
+    best solution, but in the end we identified several 
+    meaningful features from classifiers that analyzed shared and different words. Data was filtered 
+    strategically to remove noise, fed into thesel classifiers, 
+    and combined with a logistic regression model. Through this ensemble approach, we 
+    achieved 0.41 log-loss on our training data and 0.35 log-loss on our testing data.
 \end{abstract}
 
 \section{Approaches explored}
