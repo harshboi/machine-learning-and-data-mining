@@ -196,7 +196,7 @@ def tfidf_compute(qs, common_words_dict, different_words_dict):
                 current_word_count += common_words_dict[current_word][0] + common_words_dict[current_word][1]
             if current_word in different_words_dict:
                 current_word_count += different_words_dict[current_word][0] + different_words_dict[current_word][1]
-            score -= log(float(len(qs)) / (current_word_count+1))
+            score -= log((float(len(qs)) / (current_word_count+1)) + 1)
           
         for current_word in different_words:
             current_word_count = 0
@@ -204,9 +204,11 @@ def tfidf_compute(qs, common_words_dict, different_words_dict):
                 current_word_count += different_words_dict[current_word][0] + different_words_dict[current_word][1]
             if current_word in common_words_dict:
                 current_word_count += common_words_dict[current_word][0] + common_words_dict[current_word][1]
-            score += log(float(len(qs)) / (current_word_count+1))
+            score += log((float(len(qs)) / (current_word_count+1)) + 1)
         
         scores.append(score)
+        
+        
     return scores    
     
 def double_bayes_test(qs, common_words_dict, different_words_dict, class_totals):
