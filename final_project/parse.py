@@ -30,10 +30,10 @@ def text_to_wordlist(text, remove_stopwords=False, remove_punctuation=False, ste
 
     # Convert words to lower case
     text = text.lower()
-
+    
     # Optionally, remove punctuation
     if remove_punctuation:
-        text = re.sub(r"[,.;@#!&$]+\ *", " ", text)
+        text = re.sub(r"[,.;@#!&$]+\ *:", " ", text)
 
     # Optionally, remove stop words
     if remove_stopwords:
@@ -43,6 +43,12 @@ def text_to_wordlist(text, remove_stopwords=False, remove_punctuation=False, ste
             nltk.download('stopwords')
             stops = set(stopwords.words("english"))
         text = text.split()
+        for w in text:
+            if '?' in w:
+                w2 = w
+                w2 = re.sub(r"[?]", "", w2)
+                text.append(w2)   
+
         text = [w for w in text if not w in stops]
         text = " ".join(text)
 
