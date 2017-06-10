@@ -123,6 +123,16 @@ configurations.
 
 \subsubsection{Spell checking}
 
+A large amount of error in our classifier is the result of one-off misspellings
+in the dataset. To remedy this, we explored the idea of using a spell checker to
+correct the errors in the data. Several factors steered us away from this
+apporach. Firstly, we couldn't find a spell checking library that was fast
+enough to avoid unacceptable slowdown in our parser. Secondly, correcting all
+non-dictionary words to dictionary words can incur unintended side effects by
+changing intent-altering words that do not appear in common dictionaries, such
+as the names of foreign cities. Due to these considerations, we opted not to
+implement spell checking in our final solution.
+
 \subsection{Classifiers}
 
 \subsubsection{Naive Bayes}
