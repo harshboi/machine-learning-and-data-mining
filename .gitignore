@@ -90,3 +90,13 @@ ENV/
 
 # Swap files
 *.swp
+final_project/models/GoogleNews-vectors-negative300.bin
+assignment-4/data/data_reduced.txt
+assignment-4/data/data_reduced_more.txt
+final_project/data/sentences.csv
+final_project/data/test.csv
+final_project/outputs/parsed_test_data.csv
+final_project/outputs/parsed_train_data.csv
+final_project/outputs/test_data_embedded_similarity.csv
+final_project/outputs/test_data_results.csv
+final_project/outputs/train_data_embedded_similarity.csv
