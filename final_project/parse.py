@@ -12,7 +12,6 @@ import numpy as np
 import nltk
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
-from string import punctuation
 
 TRAIN_DATA_FILE = 'data/train.csv'
 OUTPUT_TRAIN_DATA_FILE = 'outputs/parsed_questions.csv'
@@ -34,7 +33,7 @@ def text_to_wordlist(text, remove_stopwords=False, remove_punctuation=False, ste
 
     # Optionally, remove punctuation
     if remove_punctuation:
-        text = text.translate(str.maketrans('','',punctuation))
+        text = re.sub(r"[,.;@#!&$]+\ *", " ", text)
 
     # Optionally, remove stop words
     if remove_stopwords:
@@ -105,14 +104,14 @@ with codecs.open(OUTPUT_TRAIN_DATA_FILE,'w','utf-8') as output_train_file:
         for values in reader:
             i += 1
             output_train_file.write(
-                "".join([
-                    text_to_wordlist(values[3], remove_stopwords=True,
-                        remove_punctuation=True), ",",
-                    text_to_wordlist(values[4], remove_stopwords=True,
-                        remove_punctuation=True), ",",
-                    values[5], "\n"
-                ])
-            )
+                    "".join([
+                        text_to_wordlist(values[3], remove_stopwords=True,
+                            remove_punctuation=True), ",",
+                        text_to_wordlist(values[4], remove_stopwords=True,
+                            remove_punctuation=True), ",",
+                        values[5], "\n"
+                        ])
+                    )
 
 print('Found ', i, ' texts in train.csv')
 
@@ -125,12 +124,12 @@ with codecs.open(OUTPUT_TEST_DATA_FILE,'w','utf-8') as output_test_file:
         for values in reader:
             i += 1
             output_test_file.write(
-                "".join([
-                    text_to_wordlist(values[1], remove_stopwords=True,
-                        remove_punctuation=True),",",
-                    text_to_wordlist(values[2], remove_stopwords=True,
-                        remove_punctuation=True), "\n"
-                ])
-            )
+                    "".join([
+                        text_to_wordlist(values[1], remove_stopwords=True,
+                            remove_punctuation=True),",",
+                        text_to_wordlist(values[2], remove_stopwords=True,
+                            remove_punctuation=True), "\n"
+                        ])
+                    )
 
 print('Found ', i, ' texts in test.csv')
