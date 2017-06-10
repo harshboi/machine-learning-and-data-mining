@@ -73,10 +73,10 @@ Using Parallel Naive Bayes, Word Embedding, and TF-IDF to Quantify Intent Differ
     to identify Quora questions with similar intent. We aimed to build a model
     that given a pair of questions, could reliably identify whether the
     questions were duplicates or not. We pursued several avenues to find the
-    best solution, but in the end we identified several 
-    meaningful features from classifiers that analyzed shared and different words. Data was filtered 
-    strategically to remove noise, fed into thesel classifiers, 
-    and combined with a logistic regression model. Through this ensemble approach, we 
+    best solution, but in the end we identified several
+    meaningful features from classifiers that analyzed shared and different words.
+    Data was filtered strategically to remove noise, fed into thesel classifiers,
+    and combined with a logistic regression model. Through this ensemble approach, we
     achieved 0.41 log-loss on our training data and 0.35 log-loss on our testing data.
 \end{abstract}
 
@@ -101,9 +101,25 @@ it provides the main classifier with more consistency across the data set.
 \subsubsection{Stop words}
 
 Another technique that we explored was the removal of stop words in the data.
-This
+This approach had both positive and negative ramifications: while it did reduce
+the amount of fluff in the data, it also removed some intent-altering words,
+such as when, where, and why. Ultimately, it resulted in lower log-loss so we
+decided to include it in our final parser.
 
-\subsubsection{Symbols}
+\subsubsection{Punctuation}
+
+In our initial implementation, the function written to strip punctuation did not do
+so properly, which was affecting our results significantly. However, when we
+changed it to strip all punctuation, we actually saw an increase in our
+log-loss. Further exploration revealed that this was caused by an interesting
+feature of the question pairs: in many cases, the last word of the question holds
+much greater weight with regard to the question's intent than the preceding
+words. By not removing the punctuation, we were unintentionally setting the last
+words apart since they were always considered by the classifier with the
+question mark included. In order to maintain this unexpected benefit without
+further complicating our classifier, we decided to remove all punctuation except
+for question marks. This gave us the lowest log-loss of all three
+configurations.
 
 \subsubsection{Spell checking}
 
