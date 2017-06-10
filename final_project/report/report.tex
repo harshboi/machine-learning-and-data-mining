@@ -87,9 +87,21 @@ settling on our final solution.
 
 \subsection{Preprocessing}
 
+Our preprocessing is primarily carried out by our file parser, which takes the
+raw CSV files and pares it down to something that is easier for our main
+classifier to work with. It performs several modifications on the data while it
+is being parsed.
+
 \subsubsection{Abbreviation substitution}
 
+One technique used by the parser is to look for common abbreviations and
+substitute in the expanded version. This is an extremely useful technique, since
+it provides the main classifier with more consistency across the data set.
+
 \subsubsection{Stop words}
+
+Another technique that we explored was the removal of stop words in the data.
+This
 
 \subsubsection{Symbols}
 
