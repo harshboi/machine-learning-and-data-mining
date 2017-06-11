@@ -312,6 +312,16 @@ that was less meaningful than the Google model. Perhaps some combination of
 them, or a model trained from Reddit or Facebook, where more casual
 conversations occur, would benefit our results.
 
+\subsubsection{Word Relationships and Synonyms}
+
+Word relation is a problem that we attempted to solve with word-embedding, but
+we still feel that could be improved. There are many questions with the same
+intent that do not share the same phrasing, but have the same intent. Words like
+“code” and “programming” are related, but our classifier doesn’t often see a
+strong enough relationship between them to realize that they represent similar
+intent. Perhaps more weight could be put on the word embedding portion of our
+classifier to address this, or find another way to represent synonyms.
+
 \section{Conclusion} \label{headings} Our goal was to create meaningful
 classifiers exploring the concept of " differing and shared words" as
 identifiers of intent between two questions. The resulting ensemble approach
