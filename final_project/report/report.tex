@@ -176,6 +176,31 @@ significant reduction to our log-loss, and more insight into certain question
 pairs. However, since we are using a pre-trained model word embedding falls
 short when it comes to misspellings.
 
+\subsubsection{Total frequency-inverse document frequency}
+
+Term Frequency - Inverse Document Frequency (TF-IDF) weights rarer words with
+more importance, similar to naive bayes. This method multiplies two frequencies:
+the number of times a word appears in a question, and the number of questions
+the word appears in. For the term frequency component, we use a binary measure
+instead of actual term frequency. This is because term frequency, due to the
+short nature of our questions, is almost always 1 anyways because a word is
+rarely repeated in questions. In a classifier that deals with longer documents,
+term frequency would have more impact. Inverse document frequency is the portion
+that we were interested in. We used this metric to represent the word importance.
+We computed a "score" to measure question similarity, where positive points were
+given if the word was shared, and negative points were given if the word was not
+shared. The amount of points given was equal to the TF-IDF, and this score was
+calculated by considering all words in both questions.
+
+\subsubsection{Logistic regression}
+
+Logistic regression was the chosen classifier to unify our features for a number
+of reasons. It was ideal because it's a relatively simple way to take an
+arbitrary number of features, learn weights, and obtain the class probabilities
+for the test data. The classifier was used to create a linear decision boundary
+for the features that we created from the data. The model is L2 regularized, and
+uses a gradient descent solver to converge on a solution.
+
 \subsubsection{Support vector machine}
 
 The final piece of our ensemble was initially a support vector machine to tie
@@ -197,38 +222,23 @@ combat this in an ensemble.
 
 \subsubsection{Long short-term memory network}
 
-\subsubsection{Logistic regression}
-
-Logistic regression was the chosen classifier to unify our features for a number
-of reasons. It was ideal because it's a relatively simple way to take an
-arbitrary number of features, learn weights, and obtain the class probabilities
-for the test data. The classifier was used to create a linear decision boundary
-for the features that we created from the data. The model is L2 regularized, and
-uses a gradient descent solver to converge on a solution.
-
-\subsection{Features}
-
-\subsubsection{Common words}
-
-\subsubsection{Unique words}
-
-\subsubsection{Total frequency-inverse document frequency}
-
-Term Frequency - Inverse Document Frequency (TF-IDF) weights rarer words with
-more importance, similar to naive bayes. This method multiplies two frequencies:
-the number of times a word appears in a question, and the number of questions
-the word appears in. For the term frequency component, we use a binary measure
-instead of actual term frequency. This is because term frequency, due to the
-short nature of our questions, is almost always 1 anyways because a word is
-rarely repeated in questions. In a classifier that deals with longer documents,
-term frequency would have more impact. Inverse document frequency is the portion
-that we were interested in. We used this metric to represent the word importance.
-We computed a "score" to measure question similarity, where positive points were
-given if the word was shared, and negative points were given if the word was not
-shared. The amount of points given was equal to the TF-IDF, and this score was
-calculated by considering all words in both questions.
-
-\subsubsection{Word sentiment}
+The most advanced classifier that we explored was a long short-term memory
+network (LSTM). This is a type of recurrant neural network that excels at
+natural language processing due to its ability to remember information for long
+periods of time through the recurrant behavior of the network. This memory gives
+it the ability to interpret context much more effectively even when compared to
+other kinds of recurrant neural networks. We used the LSTM layer provided in
+Keras to test various configurations, but ultimately decided not to use the
+classifier for several reasons. Firstly, while LSTMs do excel at natural
+language processing, they are typically used with a single text input, and in
+order to use one with the two-question inputs from our problem required more
+advanced usage of Keras input layers to concatenate the inputs. Additionally,
+our team had no prior familiarity with Keras even in the context of simple
+problems and networks, and jumping straight into a fairly complex use case
+proved to be daunting. Ultimately, between the difficulty in representing the
+data and our unfamiliarity with the framework, we decided to opt for something
+simpler to allow us to perform more intelligent optimizations on a model we knew
+more intimately.
 
 \section{Results}
 
