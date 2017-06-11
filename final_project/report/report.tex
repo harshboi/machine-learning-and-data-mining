@@ -20,6 +20,7 @@
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
+\usepackage{graphicx}
 
 \title{Enemble Learning in Quora Question Intent Matching:
 Using Parallel Naive Bayes, Word Embedding, and TF-IDF to Quantify Intent Differences}
@@ -270,6 +271,12 @@ effect on our variety of features. Keeping question marks, removing stop words,
 and a few other ideas mentioned above all yielded slight improvements in
 log-loss. The sum of all of these changes brought the log-loss to 0.3527 on the
 testing data.
+
+\begin{figure}[h]
+    \centering  
+    \fbox{\includegraphics[width=100mm]{block_diagram.png}}
+    \caption{Block diagram of final ensemble}
+\end{figure}
 
 \subsection{Possible Improvements}
 There are several limitations to our model that we think could be addressed to yield even better results in the future.
