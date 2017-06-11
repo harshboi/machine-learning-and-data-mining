@@ -35,7 +35,7 @@ Using Parallel Naive Bayes, Word Embedding, and TF-IDF to Quantify Intent Differ
 % author name.
 
 \author{
-  Nathan M.~Brahmstadt \\
+    Nathan M.~Brahmstadt \\
   Department of Electrical and Computer Engineering\\
   Oregon State University\\
   \texttt{brahmstn@oregonstate.edu} \\
@@ -68,17 +68,17 @@ Using Parallel Naive Bayes, Word Embedding, and TF-IDF to Quantify Intent Differ
 \maketitle
 
 \begin{abstract}
-	Our team set out to solve the problem set forth by the Kaggle Quora Question
+    Our team set out to solve the problem set forth by the Kaggle Quora Question
     Pairs challenge; that is, to use machine learning and data mining techniques
     to identify Quora questions with similar intent. We aimed to build a model
     that given a pair of questions, could reliably identify whether the
-    questions were duplicates or not. Several approaches were explored to generate 
-	features, and our final classifier leverages all lessons learned to minimize our log loss, 
-	which is our primary performance metric. Data was filtered 
-    strategically to remove noise, fed into three classifiers, 
-    and combined with a logistic regression model. Through this ensemble approach, we 
-    achieved 0.4102 log-loss on our training data and 0.3552 log-loss on our testing data.
-
+    questions were duplicates or not. Several approaches were explored to
+    generate features, and our final classifier leverages all lessons learned
+    to minimize our log-loss, which is our primary performance metric. Data was
+    filtered strategically to remove noise, fed into three classifiers,
+    and combined with a logistic regression model. Through this ensemble
+    approach, we achieved 0.4102 log-loss on our training data and 0.3552
+    log-loss on our testing data.
 \end{abstract}
 
 \section{Approaches explored}
@@ -132,8 +132,8 @@ approach. Firstly, we couldn't find a spell checking library that was fast
 enough to avoid unacceptable slowdown in our parser. Secondly, correcting all
 non-dictionary words to dictionary words can incur unintended side effects by
 changing intent-altering words that do not appear in common dictionaries, such
-as the names of foreign cities or people. Due to these considerations, we opted not to
-implement spell checking in our final solution.
+as the names of foreign cities or people. Due to these considerations, we opted
+not to implement spell checking in our final solution.
 
 \subsection{Classifiers}
 
@@ -156,7 +156,7 @@ The other piece of our ensemble's top layer is Google's word2vec library
 implementing a pre-trained Google News corpus of 3 million 300-dimensional
 English word vectors. Word embedding is an interesting approach to natural
 language processing which represents words as vectors in a high dimensional
-space, such that words with similar usage in context will be placed similarly in 
+space, such that words with similar usage in context will be placed similarly in
 the space. To use this classifier, we took the average of the vector values
 composing each question and then took the difference between these two values to
 get an idea of how contextually similar the questions were. This was definitely
@@ -167,9 +167,15 @@ short when it comes to misspellings.
 
 \subsubsection{Support vector machine}
 
-The final piece of our ensemble was initially a support vector machine to tie all the other
-components together. We chose to use an SVM for its simplicity and ability to
-group the outputs of the previous classifiers with wide margin. It also came with the added benefit that the results are plottable. Visualizing the data benefitted us because we could obtain a better intuition about our classifier's performance, and more easily share our results with others. However, while methods exist to calculate distances of samples to the SVM decision line in order to extract probabilities, ultimately,  logistic regression became the best and easiest method to obtain our final results from our features. 
+The final piece of our ensemble was initially a support vector machine to tie
+all the other components together. We chose to use an SVM for its simplicity and
+ability to group the outputs of the previous classifiers with wide margin. It
+also came with the added benefit that the results are plottable. Visualizing the
+data benefitted us because we could obtain a better intuition about our
+classifier's performance, and more easily share our results with others. However,
+while methods exist to calculate distances of samples to the SVM decision line
+in order to extract probabilities, ultimately,  logistic regression became the
+best and easiest method to obtain our final results from our features.
 
 \subsubsection{Convolutional neural network}
 
@@ -182,7 +188,10 @@ combat this in an ensemble.
 
 \subsubsection{Logistic Regression}
 
-Logistic regression was the chosen classifier to unify our features for a number of reasons. It was ideal because it's a relatively simple way to take an arbitrary number of features, learn weights, and obtain the class probabilities for the test data. 
+Logistic regression was the chosen classifier to unify our features for a number
+of reasons. It was ideal because it's a relatively simple way to take an
+arbitrary number of features, learn weights, and obtain the class probabilities
+for the test data.
 
 \subsection{Features}
 
@@ -196,102 +205,81 @@ Logistic regression was the chosen classifier to unify our features for a number
 
 \section{Results}
 
-In this section we explore the final solution upon which we settled. We based the structure of our algorithm with the following idea in mind: generate as many meaningful features as possible from the data, and use them to train a logistic regression model. 
+In this section we explore the final solution upon which we settled. We based
+the structure of our algorithm with the following idea in mind: generate as many
+meaningful features as possible from the data, and use them to train a logistic
+regression model.
 
 \subsubsection{Preprocessing}
 
-Before the data was input into classifiers, there were many considerations made for the preprocessing, as experimentation revealed that preprocessing choices had a huge effect on our accuracy. The lowest loss was obtained by the following preprocessing steps: unify all letters to be lowercase, replace punctuation (except question marks) with a space, replace contractions with their full words, and remove stopwords. The question mark was not removed in order to artificially raise the importance of the last word, a discovery explained in Section 1.1.3. The last word was then duplicated, so that two copies of the word were included: one with the question mark and one without.
+Before the data was input into classifiers, there were many considerations made
+for the preprocessing, as experimentation revealed that preprocessing choices
+had a huge effect on our accuracy. The lowest loss was obtained by the following
+preprocessing steps: unify all letters to be lowercase, replace punctuation
+(except question marks) with a space, replace contractions with their full words,
+and remove stopwords. The question mark was not removed in order to artificially
+raise the importance of the last word, a discovery explained in Section 1.1.3.
+The last word was then duplicated, so that two copies of the word were included:
+one with the question mark and one without.
 
 \subsubsection{Naive Bayes Models}
 
-Two Naive Bayes models were constructed from the data. One was created from the words shared between two questions, and one was created from the words that were exclsuive to one question in the pair. Using the resulting conditional probabilities from these two bag of words, we could leverage Bayes Theorem and use the resulting class probabilties as features. Smoothing is used in both models for the words in the test data not encountered in training.  
+Two Naive Bayes models were constructed from the data. One was created from the
+words shared between two questions, and one was created from the words that were
+exclsuive to one question in the pair. Using the resulting conditional
+probabilities from these two bag of words, we could leverage Bayes Theorem and
+use the resulting class probabilties as features. Smoothing is used in both
+models for the words in the test data not encountered in training.
 
 \subsubsection{Sentence Similarity using Word Embedding}
 
-Word Embedding is an interesting concept that attempts to quantify word context. It is famous for its ability to perform analogies, but we tried to leverage it as a "sentence similarity" measure, with some success. We used Word2Vec, a python package that Google has produced to create and use models easily. They also provide pre-trained vectors for use with Word2Vec which we decided to use based on the relatively small size of our data. There were many words in the training data that are only seen once, and word embedding performs significantly better after seeing a word in multiple contexts. The pre-trained model we use is a 300 feature, 10,000 word vocabulary model trained on Google News articles. To compute sentence similarity, we simply use the model to find the average word vector for both questions, and compute cosine distance between those vectors. This distance measurement has proven to be a meaningful feature in decreasing our log loss.
+Word Embedding is an interesting concept that attempts to quantify word context.
+It is famous for its ability to perform analogies, but we tried to leverage it
+as a "sentence similarity" measure, with some success. We used Word2Vec, a
+python package that Google has produced to create and use models easily. They
+also provide pre-trained vectors for use with Word2Vec which we decided to use
+based on the relatively small size of our data. There were many words in the
+training data that are only seen once, and word embedding performs significantly
+better after seeing a word in multiple contexts. The pre-trained model we use is
+a 300 feature, 10,000 word vocabulary model trained on Google News articles. To
+compute sentence similarity, we simply use the model to find the average word
+vector for both questions, and compute cosine distance between those vectors.
+This distance measurement has proven to be a meaningful feature in decreasing
+our log loss.
 
 \subsubsection{Term Frequency - Inverse Document Frequency}
 
-Term Frequency - Inverse Document Frequency (TF-IDF) weights rarer words with more importance, similar to naive bayes. This method multiplies two frequencies: the number of times a word appears in a question, and the number of questions the word appears in. For the term frequency component, we use a binary measure instead of actual term frequency. This is because term frequency, due to the short nature of our questions, is almost always 1 anyways because a word is rarely repeated in questions. In a classifier that deals with longer documents, term frequency would have more impact. Inverse document frequency is the portion that we were interested in. We used this metric to represent the word importance. We computed a "score" to measure question similarity, where positive points were given if the word was shared, and negative points were given if the word was not shared. The amount of points given was equal to the TF-IDF, and this score was calculated by considering all words in both questions. 
+Term Frequency - Inverse Document Frequency (TF-IDF) weights rarer words with
+more importance, similar to naive bayes. This method multiplies two frequencies:
+the number of times a word appears in a question, and the number of questions
+the word appears in. For the term frequency component, we use a binary measure
+instead of actual term frequency. This is because term frequency, due to the
+short nature of our questions, is almost always 1 anyways because a word is
+rarely repeated in questions. In a classifier that deals with longer documents,
+term frequency would have more impact. Inverse document frequency is the portion
+that we were interested in. We used this metric to represent the word importance.
+We computed a "score" to measure question similarity, where positive points were
+given if the word was shared, and negative points were given if the word was not
+shared. The amount of points given was equal to the TF-IDF, and this score was
+calculated by considering all words in both questions.
 
 \subsubsection{Logistic Regression}
 
-A logistic regression model was used to create a linear decision boundary for the features that we created from the data. The model is L2 regularized, and uses a gradient descent solver to converge on a solution. 
+A logistic regression model was used to create a linear decision boundary for
+the features that we created from the data. The model is L2 regularized, and
+uses a gradient descent solver to converge on a solution.
 
 \section{Conclusion}
 \label{headings}
 
-Our goal was to create meaningful classifiers exploring the concept of "differing and shared words" as identifiers of intent between two questions. The resulting ensemble approach unified three meaningful classifiers that we had discovered, and obtained a 0.35526 log-loss on the test data. This score is by no means ground-breaking, but we are satisfied by the result anyways. Our approach was able to perform above average in the competition, and we feel that the success it had, based on its relatively simple algorithm, exceeded our expectations.
-
-\subsection{Headings: second level}
-
-Second-level headings should be in 10-point type.
-
-\subsubsection{Headings: third level}
-
-Third-level headings should be in 10-point type.
-
-\paragraph{Paragraphs}
-
-There is also a \verb+\paragraph+ command available, which sets the
-heading in bold, flush left, and inline with the text, with the
-heading followed by 1\,em of space.
-
-\section{Citations, figures, tables, references}
-\label{others}
-
-These instructions apply to everyone.
-
-\subsection{Citations within the text}
-
-The \verb+natbib+ package will be loaded for you by default.
-Citations may be author/year or numeric, as long as you maintain
-internal consistency.  As to the format of the references themselves,
-any style is acceptable as long as it is used consistently.
-
-The documentation for \verb+natbib+ may be found at
-\begin{center}
-  \url{http://mirrors.ctan.org/macros/latex/contrib/natbib/natnotes.pdf}
-\end{center}
-Of note is the command \verb+\citet+, which produces citations
-appropriate for use in inline text.  For example,
-\begin{verbatim}
-   \citet{hasselmo} investigated\dots
-\end{verbatim}
-produces
-\begin{quote}
-  Hasselmo, et al.\ (1995) investigated\dots
-\end{quote}
-
-If you wish to load the \verb+natbib+ package with options, you may
-add the following before loading the \verb+nips_2017+ package:
-\begin{verbatim}
-   \PassOptionsToPackage{options}{natbib}
-\end{verbatim}
-
-If \verb+natbib+ clashes with another package you load, you can add
-the optional argument \verb+nonatbib+ when loading the style file:
-\begin{verbatim}
-   \usepackage[nonatbib]{nips_2017}
-\end{verbatim}
-
-As submission is double blind, refer to your own published work in the
-third person. That is, use ``In the previous work of Jones et
-al.\ [4],'' not ``In our previous work [4].'' If you cite your other
-papers that are not widely available (e.g., a journal paper under
-review), use anonymous author names in the citation, e.g., an author
-of the form ``A.\ Anonymous.''
-
-\subsection{Footnotes}
-
-Footnotes should be used sparingly.  If you do require a footnote,
-indicate footnotes with a number\footnote{Sample of the first
-  footnote.} in the text. Place the footnotes at the bottom of the
-page on which they appear.  Precede the footnote with a horizontal
-rule of 2~inches (12~picas).
-
-Note that footnotes are properly typeset \emph{after} punctuation
-marks.\footnote{As in this example.}
+Our goal was to create meaningful classifiers exploring the concept of "
+differing and shared words" as identifiers of intent between two questions. The
+resulting ensemble approach unified three meaningful classifiers that we had
+discovered, and obtained a 0.35526 log-loss on the test data. This score is by
+no means ground-breaking, but we are satisfied by the result anyways. Our
+approach was able to perform above average in the competition, and we feel that
+the success it had, based on its relatively simple algorithm, exceeded our
+expectations.
 
 \subsection{Figures}
 
@@ -306,9 +294,9 @@ You may use color figures.  However, it is best for the figure
 captions and the paper body to be legible if the paper is printed in
 either black/white or in color.
 \begin{figure}[h]
-  \centering
-  \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
-  \caption{Sample figure caption.}
+    \centering
+    \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
+    \caption{Sample figure caption.}
 \end{figure}
 
 \subsection{Tables}
@@ -326,105 +314,26 @@ Note that publication-quality tables \emph{do not contain vertical
   rules.} We strongly suggest the use of the \verb+booktabs+ package,
 which allows for typesetting high-quality, professional tables:
 \begin{center}
-  \url{https://www.ctan.org/pkg/booktabs}
+    \url{https://www.ctan.org/pkg/booktabs}
 \end{center}
 This package was used to typeset Table~\ref{sample-table}.
 
 \begin{table}[t]
-  \caption{Sample table title}
-  \label{sample-table}
-  \centering
-  \begin{tabular}{lll}
-    \toprule
-    \multicolumn{2}{c}{Part}                   \\
-    \cmidrule{1-2}
-    Name     & Description     & Size ($\mu$m) \\
-    \midrule
-    Dendrite & Input terminal  & $\sim$100     \\
-    Axon     & Output terminal & $\sim$10      \\
-    Soma     & Cell body       & up to $10^6$  \\
-    \bottomrule
-  \end{tabular}
+    \caption{Sample table title}
+    \label{sample-table}
+    \centering
+    \begin{tabular}{lll}
+        \toprule
+        \multicolumn{2}{c}{Part}                   \\
+        \cmidrule{1-2}
+        Name     & Description     & Size ($\mu$m) \\
+        \midrule
+        Dendrite & Input terminal  & $\sim$100     \\
+        Axon     & Output terminal & $\sim$10      \\
+        Soma     & Cell body       & up to $10^6$  \\
+        \bottomrule
+    \end{tabular}
 \end{table}
-
-\section{Final instructions}
-
-Do not change any aspects of the formatting parameters in the style
-files.  In particular, do not modify the width or length of the
-rectangle the text should fit into, and do not change font sizes
-(except perhaps in the \textbf{References} section; see below). Please
-note that pages should be numbered.
-
-\section{Preparing PDF files}
-
-Please prepare submission files with paper size ``US Letter,'' and
-not, for example, ``A4.''
-
-Fonts were the main cause of problems in the past years. Your PDF file
-must only contain Type 1 or Embedded TrueType fonts. Here are a few
-instructions to achieve this.
-
-\begin{itemize}
-
-\item You should directly generate PDF files using \verb+pdflatex+.
-
-\item You can check which fonts a PDF files uses.  In Acrobat Reader,
-  select the menu Files$>$Document Properties$>$Fonts and select Show
-  All Fonts. You can also use the program \verb+pdffonts+ which comes
-  with \verb+xpdf+ and is available out-of-the-box on most Linux
-  machines.
-
-\item The IEEE has recommendations for generating PDF files whose
-  fonts are also acceptable for NIPS. Please see
-  \url{http://www.emfield.org/icuwb2010/downloads/IEEE-PDF-SpecV32.pdf}
-
-\item \verb+xfig+ "patterned" shapes are implemented with bitmap
-  fonts.  Use "solid" shapes instead.
-
-\item The \verb+\bbold+ package almost always uses bitmap fonts.  You
-  should use the equivalent AMS Fonts:
-\begin{verbatim}
-   \usepackage{amsfonts}
-\end{verbatim}
-followed by, e.g., \verb+\mathbb{R}+, \verb+\mathbb{N}+, or
-\verb+\mathbb{C}+ for $\mathbb{R}$, $\mathbb{N}$ or $\mathbb{C}$.  You
-can also use the following workaround for reals, natural and complex:
-\begin{verbatim}
-   \newcommand{\RR}{I\!\!R} %real numbers
-   \newcommand{\Nat}{I\!\!N} %natural numbers
-   \newcommand{\CC}{I\!\!\!\!C} %complex numbers
-\end{verbatim}
-Note that \verb+amsfonts+ is automatically loaded by the
-\verb+amssymb+ package.
-
-\end{itemize}
-
-If your file contains type 3 fonts or non embedded TrueType fonts, we
-will ask you to fix it.
-
-\subsection{Margins in \LaTeX{}}
-
-Most of the margin problems come from figures positioned by hand using
-\verb+\special+ or other commands. We suggest using the command
-\verb+\includegraphics+ from the \verb+graphicx+ package. Always
-specify the figure width as a multiple of the line width as in the
-example below:
-\begin{verbatim}
-   \usepackage[pdftex]{graphicx} ...
-   \includegraphics[width=0.8\linewidth]{myfile.pdf}
-\end{verbatim}
-See Section 4.4 in the graphics bundle documentation
-(\url{http://mirrors.ctan.org/macros/latex/required/graphics/grfguide.pdf})
-
-A number of width problems arise when \LaTeX{} cannot properly
-hyphenate a line. Please give LaTeX hyphenation hints using the
-\verb+\-+ command when necessary.
-
-\subsubsection*{Acknowledgments}
-
-Use unnumbered third level headings for the acknowledgments. All
-acknowledgments go at the end of the paper. Do not include
-acknowledgments in the anonymized submission, only in the final paper.
 
 \section*{Appendix: Contribution Levels}
 
