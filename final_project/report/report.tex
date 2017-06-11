@@ -22,7 +22,7 @@
 \usepackage{microtype}      % microtypography
 \usepackage{graphicx}
 
-\title{Enemble Learning in Quora Question Intent Matching:
+\title{Ensemble Learning in Quora Question Intent Matching:
 Using Parallel Naive Bayes, Word Embedding, and TF-IDF to Quantify Intent Differences}
 
 % The \author macro works with any number of authors. There are two
@@ -87,9 +87,9 @@ Using Parallel Naive Bayes, Word Embedding, and TF-IDF to Quantify Intent Differ
 In this section we detail the various approaches that we explored before
 settling on our final solution.
 
-\subsection{Preprocessing}
+\subsection{Pre-processing}
 
-Our preprocessing is primarily carried out by our file parser, which takes the
+Our pre-processing is primarily carried out by our file parser, which takes the
 raw CSV files and pares it down to something that is easier for our main
 classifier to work with. It performs several modifications on the data while it
 is being parsed.
@@ -119,7 +119,7 @@ holds much greater weight with regard to the question's intent than the
 preceding words. By not removing the punctuation, we were unintentionally
 setting the last words apart since they were always considered by the classifier
 with the question mark included. In order to maintain this unexpected benefit
-while still taking adveantage of the gains provided by stripping punctuation, we
+while still taking advantage of the gains provided by stripping punctuation, we
 decided to remove all punctuation, but then duplicate the last word, including
 one copy with the question mark and one without. This gave us the lowest
 log-loss of all three configurations.
@@ -127,7 +127,7 @@ log-loss of all three configurations.
 \subsubsection{Spell checking}
 
 At least some of the error in our classifier is the result of one-off
-misspellings in the dataset. To remedy this, we explored the idea of using a
+misspellings in the data set. To remedy this, we explored the idea of using a
 spell checker to correct the errors in the data. Several factors steered us away
 from this approach. Firstly, we couldn't find a spell checking library that was
 fast enough to avoid unacceptable slowdown in our parser. Secondly, correcting
@@ -143,12 +143,12 @@ opted not to implement spell checking in our final solution.
 We chose this classifier right off the bat due to our familiarity with it and
 how well it lends itself to the problem. However, previous implementations we
 had seen were classifying documents independently of one another, not comparing
-two seperate texts as we are in this problem. In order to overcome this, we
+two separate texts as we are in this problem. In order to overcome this, we
 built an ensemble with two Naive Bayes classifiers: one classifier looked at the
 words which were common to the two questions, while the other looked at the set
 of words which differed. Using the resulting conditional probabilities from
 these two bag of words, we could leverage Bayes Theorem and use the resulting
-class probabilties as features. We found that these two classifiers in
+class probabilities as features. We found that these two classifiers in
 conjunction were able to make reasonable predictions on a large amount of the
 data, since most cases not covered by one were caught by the other. If either
 classifier was certain that a question was or was not a duplicate, it overrode
@@ -167,7 +167,7 @@ leverage it as a "sentence similarity" measure, with some success. To compute
 sentence similarity, we simply use the model to find the average word vector for
 both questions, and compute cosine distance between those vectors. This distance
 measurement has proven to be a meaningful feature in decreasing our log loss. We
-decided to use Google's pretrained model rather than training our own due to the
+decided to use Google's pre-trained model rather than training our own due to the
 relatively small size of our data. There were many words in the training data
 that are only seen once, and word embedding performs significantly better after
 seeing a word in multiple contexts. We also attempted to quantify sentence
@@ -183,7 +183,7 @@ falls short when it comes to misspellings.
 \subsubsection{Total frequency-inverse document frequency}
 
 Term Frequency - Inverse Document Frequency (TF-IDF) weights rarer words with
-more importance, similar to naive bayes. This method multiplies two frequencies:
+more importance, similar to Naive Bayes. This method multiplies two frequencies:
 the number of times a word appears in a question, and the number of questions
 the word appears in. For the term frequency component, we use a binary measure
 instead of actual term frequency. This is because term frequency, due to the
@@ -210,8 +210,8 @@ uses a gradient descent solver to converge on a solution.
 The final piece of our ensemble was initially a support vector machine to tie
 all the other components together. We chose to use an SVM for its simplicity and
 ability to group the outputs of the previous classifiers with wide margin. It
-also came with the added benefit that the results are plottable. Visualizing the
-data benefitted us because we could obtain a better intuition about our
+also came with the added benefit that the results are easily plotted. Visualizing the
+data benefited us because we could obtain a better intuition about our
 classifier's performance, and more easily share our results with others.
 However, while methods exist to calculate distances of samples to the SVM
 decision line in order to extract probabilities, ultimately, logistic regression
@@ -222,17 +222,17 @@ features.
 
 We also explored using a convolutional neural network to form our decision
 boundary but found it to be overly complex for the task. Additionally, we
-worried that a more complex model would overfit, and were unsure of our ability
+worried that a more complex model would over fit, and were unsure of our ability
 to combat this in an ensemble.
 
 \subsubsection{Long short-term memory network}
 
 The most advanced classifier that we explored was a long short-term memory
-network (LSTM). This is a type of recurrant neural network that excels at
+network (LSTM). This is a type of recurrent neural network that excels at
 natural language processing due to its ability to remember information for long
-periods of time through the recurrant behavior of the network. This memory gives
+periods of time through the recurrent behavior of the network. This memory gives
 it the ability to interpret context much more effectively even when compared to
-other kinds of recurrant neural networks. We used the LSTM layer provided in
+other kinds of recurrent neural networks. We used the LSTM layer provided in
 Keras to test various configurations, but ultimately decided not to use the
 classifier for several reasons. Firstly, while LSTMs do excel at natural
 language processing, they are typically used with a single text input, and in
@@ -242,7 +242,7 @@ our team had no prior familiarity with Keras even in the context of simple
 problems and networks, and jumping straight into a fairly complex use case
 proved to be daunting. Ultimately, between the difficulty in representing the
 data and our unfamiliarity with the framework, we decided to opt for something
-simpler to allow us to perform more intelligent optimizations on a model we knew
+simpler to allow us to perform more intelligent optimization on a model we knew
 more intimately.
 
 \section{Results}
@@ -261,7 +261,7 @@ only sentence similarity measure that improved our performance was comparing the
 average word vector values of the question pair, which brought up our testing
 accuracy to 77\% and our testing log-loss to 0.41. In our search for additional
 features, we also found the TF-IDF formula, which perfectly summed up our
-intuition about word rarity’s effect on the intent. After implementing tf-idf,
+intuition about word rarity’s effect on the intent. After implementing TF-IDF,
 we increased our training accuracy by 1\%. Exploring variations of this
 equation, including using binary frequency instead of actual, and smoothing
 document frequency (Similar to Naive Bayes smoothing), netting a few more
@@ -287,19 +287,19 @@ last-word doubling alone brought our log-loss from 0.37 to 0.35. Perhaps there�
 other word order features like common word pairs (“new york”, “harry potter”,
 etc) or the first word of each question that could improve our classifier. We
 did attempt this in several ways like measuring word vector distances, and
-giving TF-IDF pairs of words, but these yeilded either no net improvement or
+giving TF-IDF pairs of words, but these yielded either no net improvement or
 worse overall performance.
 
 \subsubsection{Multiple Pre-proccessed Training Data Sets}
 
 Our exploration can attest to the power of pre-processing for this problem, with
-dramatic imrpovements attained with simple steps like removing punctuation.
+dramatic improvements attained with simple steps like removing punctuation.
 However, we also see value in keeping things like stop words, as removing them
 can make two different intent questions identical in some cases. We attempted
 this by creating several classifiers trained on different parsed data, and
 feeding all of the resulting features into a single logistic regression
 function, but it dramatically reduced our performance. Perhaps with a different
-structure, like a nueral network, this could increase performance.
+structure, like a neural network, this could increase performance.
 
 \subsubsection{Word-Embedding Model Choice}
 
@@ -326,6 +326,6 @@ its relatively simple algorithm, exceeded our expectations.
 Performed exploration relating to the TF-IDF, Word Embedding, and Naive Bayes classifiers.
 
 \subsection*{Jordan - 50\%}
-Performed exploration relating to pre-processing, keras, and LTSM networks.
+Performed exploration relating to pre-processing, Keras, and LTSM networks.
 
 \end{document}
