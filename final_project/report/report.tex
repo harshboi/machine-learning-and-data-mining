@@ -68,7 +68,7 @@ Using Parallel Naive Bayes, Word Embedding, and TF-IDF to Quantify Intent Differ
 \maketitle
 
 \begin{abstract}
-    Our team set out to solve the problem set forth by the Kaggle Quora Question
+	Our team set out to solve the problem set forth by the Kaggle Quora Question
     Pairs challenge; that is, to use machine learning and data mining techniques
     to identify Quora questions with similar intent. We aimed to build a model
     that given a pair of questions, could reliably identify whether the
@@ -125,14 +125,14 @@ three configurations.
 
 \subsubsection{Spell checking}
 
-A large amount of error in our classifier is the result of one-off misspellings
+At least some of the error in our classifier is the result of one-off misspellings
 in the dataset. To remedy this, we explored the idea of using a spell checker to
 correct the errors in the data. Several factors steered us away from this
-apporach. Firstly, we couldn't find a spell checking library that was fast
+approach. Firstly, we couldn't find a spell checking library that was fast
 enough to avoid unacceptable slowdown in our parser. Secondly, correcting all
 non-dictionary words to dictionary words can incur unintended side effects by
 changing intent-altering words that do not appear in common dictionaries, such
-as the names of foreign cities. Due to these considerations, we opted not to
+as the names of foreign cities or people. Due to these considerations, we opted not to
 implement spell checking in our final solution.
 
 \subsection{Classifiers}
@@ -156,7 +156,7 @@ The other piece of our ensemble's top layer is Google's word2vec library
 implementing a pre-trained Google News corpus of 3 million 300-dimensional
 English word vectors. Word embedding is an interesting approach to natural
 language processing which represents words as vectors in a high dimensional
-space, such that words with similar usage in context will be placed similarly in
+space, such that words with similar usage in context will be placed similarly in 
 the space. To use this classifier, we took the average of the vector values
 composing each question and then took the difference between these two values to
 get an idea of how contextually similar the questions were. This was definitely
@@ -167,9 +167,9 @@ short when it comes to misspellings.
 
 \subsubsection{Support vector machine}
 
-The final piece of our ensemble is a support vector machine to tie all the other
+The final piece of our ensemble was initially a support vector machine to tie all the other
 components together. We chose to use an SVM for its simplicity and ability to
-group the outputs of the previous classifiers with wide margin.
+group the outputs of the previous classifiers with wide margin. It also came with the added benefit that the results are plottable. Visualizing the data benefitted us because we could obtain a better intuition about our classifier's performance, and more easily share our results with others. However, while methods exist to calculate distances of samples to the SVM decision line in order to extract probabilities, ultimately,  logistic regression became the best and easiest method to obtain our final results from our features. 
 
 \subsubsection{Convolutional neural network}
 
@@ -181,6 +181,8 @@ combat this in an ensemble.
 \subsubsection{Long short-term memory network}
 
 \subsubsection{Logistic Regression}
+
+Logistic regression was the chosen classifier to unify our features for a number of reasons. It was ideal because it's a relatively simple way to take an arbitrary number of features, learn weights, and obtain the class probabilities for the test data. 
 
 \subsection{Features}
 
@@ -198,12 +200,15 @@ In this section we explore the final solution upon which we settled. We based th
 
 \subsubsection{Preprocessing}
 
-Before the data was input into classifiers, there were many decisions considered 
+Before the data was input into classifiers, there were many considerations made for the preprocessing, as experimentation revealed that preprocessing choices had a huge effect on our accuracy. The lowest loss was obtained by the following preprocessing steps: unify all letters to be lowercase, replace punctuation (except question marks) with a space, replace contractions with their full words, and remove stopwords. The question mark was not removed in order to artificially raise the importance of the last word, a discovery explained in Section 1.1.3. The last word was then duplicated, so that two copies of the word were included: one with the question mark and one without.
 
+\subsubsection{Naive Bayes Models}
 
-\subsubsection{Common Word and Differing Word Naive Bayes Models}
+Two Naive Bayes models were constructed from the data. One was created from the words shared between two questions, and one was created from the words that were exclsuive to one question in the pair. Using the resulting conditional probabilities from these two bag of words, we could leverage Bayes Theorem and use the resulting class probabilties as features. Smoothing is used in both models for the words in the test data not encountered in training.  
 
 \subsubsection{Sentence Similarity using Word Embedding}
+
+Word Embedding is an interesting concept that attempts to quantify word context. It is famous for its ability to perform analogies, but we tried to leverage it as a "sentence similarity" measure, with some success. We used Word2Vec, a python package that Google has produced to create and use models easily. They also provide pre-trained vectors for use with Word2Vec which we decided to use based on the relatively small size of our data. There were many words in the training data that are only seen once, and word embedding performs significantly better after seeing a word in multiple contexts. The pre-trained model we use is a 300 feature, 10,000 word vocabulary model trained on Google News articles. To compute sentence similarity, we simply use the model to find the average word vector for both questions, and compute cosine distance between those vectors. This distance measurement has proven to be a meaningful feature in decreasing our log loss.
 
 \subsubsection{Term Frequency - Inverse Document Frequency}
 
