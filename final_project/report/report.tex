@@ -77,7 +77,7 @@ Using Parallel Naive Bayes, Word Embedding, and TF-IDF to Quantify Intent Differ
     meaningful features from classifiers that analyzed shared and different words. Data was filtered 
     strategically to remove noise, fed into thesel classifiers, 
     and combined with a logistic regression model. Through this ensemble approach, we 
-    achieved 0.41 log-loss on our training data and 0.35 log-loss on our testing data.
+    achieved 0.4102 log-loss on our training data and 0.3552 log-loss on our testing data.
 \end{abstract}
 
 \section{Approaches explored}
@@ -119,6 +119,8 @@ This
 
 \subsubsection{Long short-term memory network}
 
+\subsubsection{Logistic Regression}
+
 \subsection{Features}
 
 \subsubsection{Common words}
@@ -131,18 +133,26 @@ This
 
 \section{Results}
 
-In this section we explore the final solution upon which we settled. While there
-are many classifiers that would perhaps be equally or better suited to solving
-this problem, we chose classifiers that we were more familiar with for our final
-solution, so we could optimize their results more knowledgably.
+In this section we explore the final solution upon which we settled. We based the structure of our algorithm with the following idea in mind: generate as many meaningful features as possible from the data, and use them to train a logistic regression model. 
+
+\subsubsection{Preprocessing}
+
+Before the data was input into classifiers, there were many decisions considered 
+
+
+\subsubsection{Common Word and Differing Word Naive Bayes Models}
+
+\subsubsection{Sentence Similarity using Word Embedding}
+
+\subsubsection{Term Frequency - Inverse Document Frequency}
+
+\subsubsection{Logistic Regression}
+
 
 \section{Conclusion}
 \label{headings}
 
-All headings should be lower case (except for first word and proper
-nouns), flush left, and bold.
-
-First-level headings should be in 12-point type.
+Our goal was to create meaningful classifiers exploring the concept of "differing and shared words" as identifiers of intent between two questions. The resulting ensemble approach unified three meaningful classifiers that we had discovered, and obtained a 0.35526 log-loss on the test data. This score is by no means ground-breaking, but we are satisfied by the result anyways. Our approach was able to perform above average in the competition, and we feel that the success it had, based on its relatively simple algorithm, exceeded our expectations.
 
 \subsection{Headings: second level}
 

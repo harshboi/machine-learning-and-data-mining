@@ -35,23 +35,6 @@ def text_to_wordlist(text, remove_stopwords=False, remove_punctuation=False, ste
     if remove_punctuation:
         text = re.sub(r"[,.;@#!&$]+\ *:", " ", text)
 
-    # Optionally, remove stop words
-    if remove_stopwords:
-        try:
-            stops = set(stopwords.words("english"))
-        except:
-            nltk.download('stopwords')
-            stops = set(stopwords.words("english"))
-        text = text.split()
-        for w in text:
-            if '?' in w:
-                w2 = w
-                w2 = re.sub(r"[?]", "", w2)
-                text.append(w2)   
-
-        text = [w for w in text if not w in stops]
-        text = " ".join(text)
-
     # Clean the text
     #text = re.sub(r"[^A-Za-z0-9^,!.\/'+-=]", " ", text)
     text = re.sub(r"[()]", "", text)
@@ -90,7 +73,23 @@ def text_to_wordlist(text, remove_stopwords=False, remove_punctuation=False, ste
     text = re.sub(r"\0rs ", " rs ", text)
     text = re.sub(r"programing", "programming", text)
     text = re.sub(r"bestfriend", "best friend", text)
+    
+    # Optionally, remove stop words
+    if remove_stopwords:
+        try:
+            stops = set(stopwords.words("english"))
+        except:
+            nltk.download('stopwords')
+            stops = set(stopwords.words("english"))
+        text = text.split()
+        for w in text:
+            if '?' in w:
+                w2 = w
+                w2 = re.sub(r"[?]", "", w2)
+                text.append(w2)   
 
+        text = [w for w in text if not w in stops]
+        text = " ".join(text)
     # Optionally, shorten words to their stems
     if stem_words:
         text = text.split()
