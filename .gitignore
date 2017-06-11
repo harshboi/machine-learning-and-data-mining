@@ -101,3 +101,5 @@ final_project/outputs/test_data_embedded_similarity.csv
 final_project/outputs/test_data_results.csv
 final_project/outputs/train_data_embedded_similarity.csv
 final_project/outputs/wrong.csv
+final_project/report/report.pdf
+final_project/report/report.synctex.gz
