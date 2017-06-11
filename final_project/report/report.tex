@@ -75,9 +75,10 @@ Using Parallel Naive Bayes, Word Embedding, and TF-IDF to Quantify Intent Differ
     questions were duplicates or not. We pursued several avenues to find the
     best solution, but in the end we identified several 
     meaningful features from classifiers that analyzed shared and different words. Data was filtered 
-    strategically to remove noise, fed into thesel classifiers, 
+    strategically to remove noise, fed into three classifiers, 
     and combined with a logistic regression model. Through this ensemble approach, we 
     achieved 0.4102 log-loss on our training data and 0.3552 log-loss on our testing data.
+
 \end{abstract}
 
 \section{Approaches explored}
@@ -101,21 +102,81 @@ it provides the main classifier with more consistency across the data set.
 \subsubsection{Stop words}
 
 Another technique that we explored was the removal of stop words in the data.
-This
+This approach had both positive and negative ramifications: while it did reduce
+the amount of fluff in the data, it also removed some intent-altering words,
+such as when, where, and why. Ultimately, it resulted in lower log-loss so we
+decided to include it in our final parser.
 
-\subsubsection{Symbols}
+\subsubsection{Punctuation}
+
+In our initial implementation, the function written to strip punctuation did not do
+so properly, which was affecting our results significantly. However, when we
+changed it to strip all punctuation, we actually saw an increase in our
+log-loss. Further exploration revealed that this was caused by an interesting
+feature of the question pairs: in many cases, the last word of the question holds
+much greater weight with regard to the question's intent than the preceding
+words. By not removing the punctuation, we were unintentionally setting the last
+words apart since they were always considered by the classifier with the
+question mark included. In order to maintain this unexpected benefit while still
+taking adveantage of the gains provided by stripping punctuation, we decided to
+remove all punctuation, but then duplicate the last word, including one copy
+with the question mark and one without. This gave us the lowest log-loss of all
+three configurations.
 
 \subsubsection{Spell checking}
+
+A large amount of error in our classifier is the result of one-off misspellings
+in the dataset. To remedy this, we explored the idea of using a spell checker to
+correct the errors in the data. Several factors steered us away from this
+apporach. Firstly, we couldn't find a spell checking library that was fast
+enough to avoid unacceptable slowdown in our parser. Secondly, correcting all
+non-dictionary words to dictionary words can incur unintended side effects by
+changing intent-altering words that do not appear in common dictionaries, such
+as the names of foreign cities. Due to these considerations, we opted not to
+implement spell checking in our final solution.
 
 \subsection{Classifiers}
 
 \subsubsection{Naive Bayes}
 
+We chose this classifier right off the bat due to our familiarity with it and
+how well it lends itself to the problem. However, previous implementations we
+had seen were calssifying documents independently of one another, not comparing
+two seperate texts as we are in this problem. In order to overcome this, we
+built an ensemble with two Naive Bayes classifiers: one classifier looked at the
+words which were common to the two questions, while the other looked at the set
+of words which differed. We found that these two in conjunction were able to
+make reasonable predictions on a large amount of the data, since most cases not
+covered by one were caught by the other. If either classifier was certain that a
+question was or was not a duplicate, it overrode the more uncertain classifier.
+
 \subsubsection{Word embedding}
+
+The other piece of our ensemble's top layer is Google's word2vec library
+implementing a pre-trained Google News corpus of 3 million 300-dimensional
+English word vectors. Word embedding is an interesting approach to natural
+language processing which represents words as vectors in a high dimensional
+space, such that words with similar usage in context will be placed similarly in
+the space. To use this classifier, we took the average of the vector values
+composing each question and then took the difference between these two values to
+get an idea of how contextually similar the questions were. This was definitely
+the least helpful of the classifiers used in our ensemble, but it provided a
+significant reduction to our log-loss, and more insight into certain question
+pairs. However, since we are using a pre-trained model word embedding falls
+short when it comes to misspellings.
 
 \subsubsection{Support vector machine}
 
+The final piece of our ensemble is a support vector machine to tie all the other
+components together. We chose to use an SVM for its simplicity and ability to
+group the outputs of the previous classifiers with wide margin.
+
 \subsubsection{Convolutional neural network}
+
+We also explored using a convolutional neural network to take the place of the
+SVM, but found it to be overly complex for the task. Additionally, we worried
+that a more complex model would overfit, and were unsure of our ability to
+combat this in an ensemble.
 
 \subsubsection{Long short-term memory network}
 
@@ -127,7 +188,7 @@ This
 
 \subsubsection{Unique words}
 
-\subsubsection{Word rarity}
+\subsubsection{Total frequency-inverse document frequency}
 
 \subsubsection{Word sentiment}
 
