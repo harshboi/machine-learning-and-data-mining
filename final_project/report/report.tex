@@ -113,27 +113,27 @@ In our initial implementation, the function written to strip punctuation did not
 do so properly, which was affecting our results significantly. However, when we
 changed it to strip all punctuation, we actually saw an increase in our
 log-loss. Further exploration revealed that this was caused by an interesting
-feature of the question pairs: in many cases, the last word of the question holds
-much greater weight with regard to the question's intent than the preceding
-words. By not removing the punctuation, we were unintentionally setting the last
-words apart since they were always considered by the classifier with the
-question mark included. In order to maintain this unexpected benefit while still
-taking adveantage of the gains provided by stripping punctuation, we decided to
-remove all punctuation, but then duplicate the last word, including one copy
-with the question mark and one without. This gave us the lowest log-loss of all
-three configurations.
+feature of the question pairs: in many cases, the last word of the question
+holds much greater weight with regard to the question's intent than the
+preceding words. By not removing the punctuation, we were unintentionally
+setting the last words apart since they were always considered by the classifier
+with the question mark included. In order to maintain this unexpected benefit
+while still taking adveantage of the gains provided by stripping punctuation, we
+decided to remove all punctuation, but then duplicate the last word, including
+one copy with the question mark and one without. This gave us the lowest
+log-loss of all three configurations.
 
 \subsubsection{Spell checking}
 
-At least some of the error in our classifier is the result of one-off misspellings
-in the dataset. To remedy this, we explored the idea of using a spell checker to
-correct the errors in the data. Several factors steered us away from this
-approach. Firstly, we couldn't find a spell checking library that was fast
-enough to avoid unacceptable slowdown in our parser. Secondly, correcting all
-non-dictionary words to dictionary words can incur unintended side effects by
-changing intent-altering words that do not appear in common dictionaries, such
-as the names of foreign cities or people. Due to these considerations, we opted
-not to implement spell checking in our final solution.
+At least some of the error in our classifier is the result of one-off
+misspellings in the dataset. To remedy this, we explored the idea of using a
+spell checker to correct the errors in the data. Several factors steered us away
+from this approach. Firstly, we couldn't find a spell checking library that was
+fast enough to avoid unacceptable slowdown in our parser. Secondly, correcting
+all non-dictionary words to dictionary words can incur unintended side effects
+by changing intent-altering words that do not appear in common dictionaries,
+such as the names of foreign cities or people. Due to these considerations, we
+opted not to implement spell checking in our final solution.
 
 \subsection{Classifiers}
 
@@ -141,7 +141,7 @@ not to implement spell checking in our final solution.
 
 We chose this classifier right off the bat due to our familiarity with it and
 how well it lends itself to the problem. However, previous implementations we
-had seen were calssifying documents independently of one another, not comparing
+had seen were classifying documents independently of one another, not comparing
 two seperate texts as we are in this problem. In order to overcome this, we
 built an ensemble with two Naive Bayes classifiers: one classifier looked at the
 words which were common to the two questions, while the other looked at the set
@@ -151,7 +151,7 @@ class probabilties as features. We found that these two classifiers in
 conjunction were able to make reasonable predictions on a large amount of the
 data, since most cases not covered by one were caught by the other. If either
 classifier was certain that a question was or was not a duplicate, it overrode
-the more uncertain classifier. Smoothing is used in both modelsto allow for the
+the more uncertain classifier. Smoothing is used in both models to allow for the
 words in the test data which are not encountered in training.
 
 \subsubsection{Word embedding}
@@ -162,19 +162,22 @@ English word vectors. Word embedding is an interesting approach to natural
 language processing which represents words as vectors in a high dimensional
 space, such that words with similar usage in context will be placed similarly in
 the space. It is famous for its ability to perform analogies, but we tried to
-leverage it as a "sentence similarity" measure, with some success. To
-compute sentence similarity, we simply use the model to find the average word
-vector for both questions, and compute cosine distance between those vectors.
-This distance measurement has proven to be a meaningful feature in decreasing
-our log loss. We decided to use
-Google's pretrained model rather than training our own due to the relatively
-small size of our data. There were many words in the
-training data that are only seen once, and word embedding performs significantly
-better after seeing a word in multiple contexts. This was definitely
-the least helpful of the classifiers used in our ensemble, but it provided a
-significant reduction to our log-loss, and more insight into certain question
-pairs. However, since we are using a pre-trained model word embedding falls
-short when it comes to misspellings.
+leverage it as a "sentence similarity" measure, with some success. To compute
+sentence similarity, we simply use the model to find the average word vector for
+both questions, and compute cosine distance between those vectors. This distance
+measurement has proven to be a meaningful feature in decreasing our log loss. We
+decided to use Google's pretrained model rather than training our own due to the
+relatively small size of our data. There were many words in the training data
+that are only seen once, and word embedding performs significantly better after
+seeing a word in multiple contexts. We also attempted to quantify sentence
+similarity with a variety of other equations, but without success. One idea was
+to sum the distance of each word vector to the next word in the question,
+providing some insight into word order, context, and word choice. However this
+measure failed to increase our accuracy or decrease our loss. This was
+definitely the least helpful of the classifiers used in our ensemble, but it
+provided a significant reduction to our log-loss, and more insight into certain
+question pairs. However, since we are using a pre-trained model word embedding
+falls short when it comes to misspellings.
 
 \subsubsection{Total frequency-inverse document frequency}
 
@@ -186,11 +189,11 @@ instead of actual term frequency. This is because term frequency, due to the
 short nature of our questions, is almost always 1 anyways because a word is
 rarely repeated in questions. In a classifier that deals with longer documents,
 term frequency would have more impact. Inverse document frequency is the portion
-that we were interested in. We used this metric to represent the word importance.
-We computed a "score" to measure question similarity, where positive points were
-given if the word was shared, and negative points were given if the word was not
-shared. The amount of points given was equal to the TF-IDF, and this score was
-calculated by considering all words in both questions.
+that we were interested in. We used this metric to represent the word
+importance. We computed a "score" to measure question similarity, where positive
+points were given if the word was shared, and negative points were given if the
+word was not shared. The amount of points given was equal to the TF-IDF, and
+this score was calculated by considering all words in both questions.
 
 \subsubsection{Logistic regression}
 
@@ -208,17 +211,18 @@ all the other components together. We chose to use an SVM for its simplicity and
 ability to group the outputs of the previous classifiers with wide margin. It
 also came with the added benefit that the results are plottable. Visualizing the
 data benefitted us because we could obtain a better intuition about our
-classifier's performance, and more easily share our results with others. However,
-while methods exist to calculate distances of samples to the SVM decision line
-in order to extract probabilities, ultimately,  logistic regression became the
-best and easiest method to obtain our final results from our features.
+classifier's performance, and more easily share our results with others.
+However, while methods exist to calculate distances of samples to the SVM
+decision line in order to extract probabilities, ultimately, logistic regression
+became the best and easiest method to obtain our final results from our
+features.
 
 \subsubsection{Convolutional neural network}
 
 We also explored using a convolutional neural network to form our decision
-boundary but found it to be overly complex for the task. Additionally, we worried
-that a more complex model would overfit, and were unsure of our ability to
-combat this in an ensemble.
+boundary but found it to be overly complex for the task. Additionally, we
+worried that a more complex model would overfit, and were unsure of our ability
+to combat this in an ensemble.
 
 \subsubsection{Long short-term memory network}
 
@@ -242,81 +246,79 @@ more intimately.
 
 \section{Results}
 
-In this section we explore the final solution upon which we settled. We based
-the structure of our algorithm with the following idea in mind: generate as many
-meaningful features as possible from the data, and use them to train a logistic
-regression model.
+In this section we explore the results of our explorations, how we improved our
+model over time, and the limitations of our chosen model.
 
-\section{Conclusion}
-\label{headings}
+\subsection{Exploration Results}
 
-Our goal was to create meaningful classifiers exploring the concept of "
-differing and shared words" as identifiers of intent between two questions. The
-resulting ensemble approach unified three meaningful classifiers that we had
-discovered, and obtained a 0.35526 log-loss on the test data. This score is by
-no means ground-breaking, but we are satisfied by the result anyways. Our
-approach was able to perform above average in the competition, and we feel that
-the success it had, based on its relatively simple algorithm, exceeded our
-expectations.
+Our initial approach of using two Naive Bayes models was only slightly above
+50\% accuracy on training data. This was improved drastically with
+pre-processing, which was able to bring that accuracy to over 70\%. Our testing
+log-loss was 0.435 with this model. At this point, we searched for another
+feature to add, which is when we started experimenting with word embedding. The
+only sentence similarity measure that improved our performance was comparing the
+average word vector values of the question pair, which brought up our testing
+accuracy to 77\% and our testing log-loss to 0.41. In our search for additional
+features, we also found the TF-IDF formula, which perfectly summed up our
+intuition about word rarity’s effect on the intent. After implementing tf-idf,
+we increased our training accuracy by 1\%. Exploring variations of this
+equation, including using binary frequency instead of actual, and smoothing
+document frequency (Similar to Naive Bayes smoothing), netting a few more
+percentage points. Overall, TF-IDF brought us to 0.39 log-loss on the testing
+data. At this point, we went back to the pre-processing options to explore its
+effect on our variety of features. Keeping question marks, removing stop words,
+and a few other ideas mentioned above all yielded slight improvements in
+log-loss. The sum of all of these changes brought the log-loss to 0.3527 on the
+testing data.
 
-\subsection{Figures}
+\subsection{Possible Improvements}
+There are several limitations to our model that we think could be addressed to yield even better results in the future.
 
-All artwork must be neat, clean, and legible. Lines should be dark
-enough for purposes of reproduction. The figure number and caption
-always appear after the figure. Place one line space before the figure
-caption and one line space after the figure. The figure caption should
-be lower case (except for first word and proper nouns); figures are
-numbered consecutively.
+\subsubsection{Word Order} First, none of features take word order into
+consideration (except the last word doubling that we do in pre-processing). The
+last-word doubling alone brought our log-loss from 0.37 to 0.35. Perhaps there’s
+other word order features like common word pairs (“new york”, “harry potter”,
+etc) or the first word of each question that could improve our classifier. We
+did attempt this in several ways like measuring word vector distances, and
+giving TF-IDF pairs of words, but these yeilded either no net improvement or
+worse overall performance.
 
-You may use color figures.  However, it is best for the figure
-captions and the paper body to be legible if the paper is printed in
-either black/white or in color.
-\begin{figure}[h]
-    \centering
-    \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
-    \caption{Sample figure caption.}
-\end{figure}
+\subsubsection{Multiple Pre-proccessed Training Data Sets}
 
-\subsection{Tables}
+Our exploration can attest to the power of pre-processing for this problem, with
+dramatic imrpovements attained with simple steps like removing punctuation.
+However, we also see value in keeping things like stop words, as removing them
+can make two different intent questions identical in some cases. We attempted
+this by creating several classifiers trained on different parsed data, and
+feeding all of the resulting features into a single logistic regression
+function, but it dramatically reduced our performance. Perhaps with a different
+structure, like a nueral network, this could increase performance.
 
-All tables must be centered, neat, clean and legible.  The table
-number and title always appear before the table.  See
-Table~\ref{sample-table}.
+\subsubsection{Word-Embedding Model Choice}
 
-Place one line space before the table title, one line space after the
-table title, and one line space after the table. The table title must
-be lower case (except for first word and proper nouns); tables are
-numbered consecutively.
+Instead of using a model trained from Google News, other sources might be more
+meaningful. News articles probably don’t consist of too much slang or spelling
+errors, therefore the model has no representation for those things, which are
+numerous in the Quora Data. We tried to train the model on the Quora data, but
+that was less meaningful than the Google model. Perhaps some combination of
+them, or a model trained from Reddit or Facebook, where more casual
+conversations occur, would benefit our results.
 
-Note that publication-quality tables \emph{do not contain vertical
-  rules.} We strongly suggest the use of the \verb+booktabs+ package,
-which allows for typesetting high-quality, professional tables:
-\begin{center}
-    \url{https://www.ctan.org/pkg/booktabs}
-\end{center}
-This package was used to typeset Table~\ref{sample-table}.
-
-\begin{table}[t]
-    \caption{Sample table title}
-    \label{sample-table}
-    \centering
-    \begin{tabular}{lll}
-        \toprule
-        \multicolumn{2}{c}{Part}                   \\
-        \cmidrule{1-2}
-        Name     & Description     & Size ($\mu$m) \\
-        \midrule
-        Dendrite & Input terminal  & $\sim$100     \\
-        Axon     & Output terminal & $\sim$10      \\
-        Soma     & Cell body       & up to $10^6$  \\
-        \bottomrule
-    \end{tabular}
-\end{table}
+\section{Conclusion} \label{headings} Our goal was to create meaningful
+classifiers exploring the concept of " differing and shared words" as
+identifiers of intent between two questions. The resulting ensemble approach
+unified three meaningful classifiers that we had discovered, and obtained a
+0.35274 log-loss on the test data. This score is by no means ground-breaking,
+but we are satisfied by the result anyways. Our approach was able to perform
+above average in the competition, and we feel that the success it had, based on
+its relatively simple algorithm, exceeded our expectations.
 
 \section*{Appendix: Contribution Levels}
 
-\subsection*{Nathan}
+\subsection*{Nathan - 50\%}
+Performed exploration relating to the TF-IDF, Word Embedding, and Naive Bayes classifiers.
 
-\subsection*{Jordan}
+\subsection*{Jordan - 50\%}
+Performed exploration relating to pre-processing, keras, and LTSM networks.
 
 \end{document}
