@@ -116,10 +116,11 @@ feature of the question pairs: in many cases, the last word of the question hold
 much greater weight with regard to the question's intent than the preceding
 words. By not removing the punctuation, we were unintentionally setting the last
 words apart since they were always considered by the classifier with the
-question mark included. In order to maintain this unexpected benefit without
-further complicating our classifier, we decided to remove all punctuation except
-for question marks. This gave us the lowest log-loss of all three
-configurations.
+question mark included. In order to maintain this unexpected benefit while still
+taking adveantage of the gains provided by stripping punctuation, we decided to
+remove all punctuation, but then duplicate the last word, including one copy
+with the question mark and one without. This gave us the lowest log-loss of all
+three configurations.
 
 \subsubsection{Spell checking}
 
@@ -137,11 +138,44 @@ implement spell checking in our final solution.
 
 \subsubsection{Naive Bayes}
 
+We chose this classifier right off the bat due to our familiarity with it and
+how well it lends itself to the problem. However, previous implementations we
+had seen were calssifying documents independently of one another, not comparing
+two seperate texts as we are in this problem. In order to overcome this, we
+built an ensemble with two Naive Bayes classifiers: one classifier looked at the
+words which were common to the two questions, while the other looked at the set
+of words which differed. We found that these two in conjunction were able to
+make reasonable predictions on a large amount of the data, since most cases not
+covered by one were caught by the other. If either classifier was certain that a
+question was or was not a duplicate, it overrode the more uncertain classifier.
+
 \subsubsection{Word embedding}
+
+The other piece of our ensemble's top layer is Google's word2vec library
+implementing a pre-trained Google News corpus of 3 million 300-dimensional
+English word vectors. Word embedding is an interesting approach to natural
+language processing which represents words as vectors in a high dimensional
+space, such that words with similar usage in context will be placed similarly in
+the space. To use this classifier, we took the average of the vector values
+composing each question and then took the difference between these two values to
+get an idea of how contextually similar the questions were. This was definitely
+the least helpful of the classifiers used in our ensemble, but it provided a
+significant reduction to our log-loss, and more insight into certain question
+pairs. However, since we are using a pre-trained model word embedding falls
+short when it comes to misspellings.
 
 \subsubsection{Support vector machine}
 
+The final piece of our ensemble is a support vector machine to tie all the other
+components together. We chose to use an SVM for its simplicity and ability to
+group the outputs of the previous classifiers with wide margin.
+
 \subsubsection{Convolutional neural network}
+
+We also explored using a convolutional neural network to take the place of the
+SVM, but found it to be overly complex for the task. Additionally, we worried
+that a more complex model would overfit, and were unsure of our ability to
+combat this in an ensemble.
 
 \subsubsection{Long short-term memory network}
 
@@ -151,7 +185,7 @@ implement spell checking in our final solution.
 
 \subsubsection{Unique words}
 
-\subsubsection{Word rarity}
+\subsubsection{Total frequency-inverse document frequency}
 
 \subsubsection{Word sentiment}
 
