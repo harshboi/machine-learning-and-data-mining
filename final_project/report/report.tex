@@ -75,9 +75,9 @@ Using Parallel Naive Bayes, Word Embedding, and TF-IDF to Quantify Intent Differ
     questions were duplicates or not. Several approaches were explored to
     generate features, and our final classifier leverages all lessons learned
     to minimize our log-loss, which is our primary performance metric. Data was
-    filtered strategically to remove noise, fed into three classifiers,
+    filtered strategically to remove noise, fed into four classifiers,
     and combined with a logistic regression model. Through this ensemble
-    approach, we achieved 0.4102 log-loss on our training data and 0.3552
+    approach, we achieved 0.4102 log-loss on our training data and 0.3527
     log-loss on our testing data.
 \end{abstract}
 
@@ -93,7 +93,7 @@ raw CSV files and pares it down to something that is easier for our main
 classifier to work with. It performs several modifications on the data while it
 is being parsed.
 
-\subsubsection{Abbreviation substitution}
+\subsubsection{Abbreviation expansion}
 
 One technique used by the parser is to look for common abbreviations and
 substitute in the expanded version. This is an extremely useful technique, since
