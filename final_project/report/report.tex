@@ -250,7 +250,7 @@ more intimately.
 In this section we explore the results of our explorations, how we improved our
 model over time, and the limitations of our chosen model.
 
-\subsection{Exploration Results}
+\subsection{Exploration results}
 
 Our initial approach of using two Naive Bayes models was only slightly above
 50\% accuracy on training data. This was improved drastically with
@@ -273,16 +273,16 @@ log-loss. The sum of all of these changes brought the log-loss to 0.3527 on the
 testing data.
 
 \begin{figure}[h]
-    \centering  
-    \fbox{\includegraphics[width=100mm]{block_diagram.png}}
+    \centering
+    \mbox{\includegraphics[width=100mm]{block_diagram.png}}
     \caption{Block diagram of final ensemble}
 \end{figure}
 
-\subsection{Possible Improvements}
+\subsection{Possible improvements}
 There are several limitations to our model that we think could be addressed to
 yield even better results in the future.
 
-\subsubsection{Word Order} First, none of features take word order into
+\subsubsection{Word order} First, none of features take word order into
 consideration (except the last word doubling that we do in pre-processing). The
 last-word doubling alone brought our log-loss from 0.37 to 0.35. Perhaps there’s
 other word order features like common word pairs (“new york”, “harry potter”,
@@ -291,7 +291,7 @@ did attempt this in several ways like measuring word vector distances, and
 giving TF-IDF pairs of words, but these yielded either no net improvement or
 worse overall performance.
 
-\subsubsection{Multiple Pre-proccessed Training Data Sets}
+\subsubsection{Multiple pre-proccessed training data sets}
 
 Our exploration can attest to the power of pre-processing for this problem, with
 dramatic improvements attained with simple steps like removing punctuation.
@@ -302,7 +302,7 @@ feeding all of the resulting features into a single logistic regression
 function, but it dramatically reduced our performance. Perhaps with a different
 structure, like a neural network, this could increase performance.
 
-\subsubsection{Word-Embedding Model Choice}
+\subsubsection{Word-embedding model choice}
 
 Instead of using a model trained from Google News, other sources might be more
 meaningful. News articles probably don’t consist of too much slang or spelling
@@ -312,7 +312,7 @@ that was less meaningful than the Google model. Perhaps some combination of
 them, or a model trained from Reddit or Facebook, where more casual
 conversations occur, would benefit our results.
 
-\subsubsection{Word Relationships and Synonyms}
+\subsubsection{Word relationships and synonyms}
 
 Word relation is a problem that we attempted to solve with word-embedding, but
 we still feel that could be improved. There are many questions with the same
@@ -331,7 +331,7 @@ but we are satisfied by the result anyways. Our approach was able to perform
 above average in the competition, and we feel that the success it had, based on
 its relatively simple algorithm, exceeded our expectations.
 
-\section*{Appendix: Contribution Levels}
+\section*{Appendix: contribution levels}
 
 \subsection*{Nathan - 50\%}
 Performed exploration relating to the TF-IDF, Word Embedding, and Naive Bayes classifiers.
