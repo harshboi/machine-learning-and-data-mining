@@ -20,6 +20,7 @@
 \usepackage{amsfonts}       % blackboard math symbols
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
+\usepackage{graphicx}
 
 \title{Ensemble Learning in Quora Question Intent Matching:
 Using Parallel Naive Bayes, Word Embedding, and TF-IDF to Quantify Intent Differences}
@@ -271,8 +272,15 @@ and a few other ideas mentioned above all yielded slight improvements in
 log-loss. The sum of all of these changes brought the log-loss to 0.3527 on the
 testing data.
 
+\begin{figure}[h]
+    \centering  
+    \fbox{\includegraphics[width=100mm]{block_diagram.png}}
+    \caption{Block diagram of final ensemble}
+\end{figure}
+
 \subsection{Possible Improvements}
-There are several limitations to our model that we think could be addressed to yield even better results in the future.
+There are several limitations to our model that we think could be addressed to
+yield even better results in the future.
 
 \subsubsection{Word Order} First, none of features take word order into
 consideration (except the last word doubling that we do in pre-processing). The
@@ -304,8 +312,18 @@ that was less meaningful than the Google model. Perhaps some combination of
 them, or a model trained from Reddit or Facebook, where more casual
 conversations occur, would benefit our results.
 
+\subsubsection{Word Relationships and Synonyms}
+
+Word relation is a problem that we attempted to solve with word-embedding, but
+we still feel that could be improved. There are many questions with the same
+intent that do not share the same phrasing, but have the same intent. Words like
+“code” and “programming” are related, but our classifier doesn’t often see a
+strong enough relationship between them to realize that they represent similar
+intent. Perhaps more weight could be put on the word embedding portion of our
+classifier to address this, or find another way to represent synonyms.
+
 \section{Conclusion} \label{headings} Our goal was to create meaningful
-classifiers exploring the concept of " differing and shared words" as
+classifiers exploring the concept of "differing and shared words" as
 identifiers of intent between two questions. The resulting ensemble approach
 unified three meaningful classifiers that we had discovered, and obtained a
 0.35274 log-loss on the test data. This score is by no means ground-breaking,
